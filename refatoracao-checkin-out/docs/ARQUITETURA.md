@@ -4,15 +4,18 @@
 
 ```
 refatoracao-checkin-out/
-├── README.md            # Documentação principal
-├── src/                 # Código-fonte da aplicação
-│   ├── index.html       # Página HTML principal
-│   ├── style.css        # Estilos CSS
-│   └── app.js           # Lógica JavaScript
-├── data/                # Exemplos de JSON/dados estáticos
+├── README.md                   # Documentação principal
+├── src/                        # Código-fonte da aplicação
+│   ├── html/
+│   │   └── index.html          # Página HTML principal (367 linhas)
+│   ├── css/
+│   │   └── style.css           # Estilos CSS
+│   └── js/
+│       └── app.js              # Lógica JavaScript (1010 linhas)
+├── data/                       # Exemplos de JSON/dados estáticos
 │   └── dados-exemplo.json
-└── docs/                # Documentação e guias
-    ├── ARQUITETURA.md   # Este arquivo
+└── docs/                       # Documentação e guias
+    ├── ARQUITETURA.md          # Este arquivo
     ├── COMECE.md
     ├── GUIA-RAPIDO.md
     ├── INDICE.md
@@ -47,7 +50,7 @@ refatoracao-checkin-out/
 
 ## 📊 Fluxo de Dados
 
-### 1️⃣ Fluxo de Checkin/Checkout
+### 1️⃣ Fluxo de Checkin/Checkout Normal (QR Code)
 
 ```
 Usuário Clica "Simular QR Code"
@@ -60,7 +63,9 @@ Gera Dados QR (com coordenadas)
             ↓
 Gera Código 2FA Random (6 dígitos)
             ↓
-Exibe Código para Usuário
+Inicia Timer (45 segundos)
+            ↓
+Exibe Modal 2FA com Código para Usuário
             ↓
 Usuário Digita Código
             ↓
@@ -83,9 +88,71 @@ validate2FACode()
                             ↓
                     showValidationResults()
                             ↓
+                    Exibe Modal de Resultado
+                            ↓
                     updateHistoryTable()
                             ↓
                     updateStatus()
+```
+
+### 2️⃣ Fluxo do Painel do Cliente (Código Autorização)
+
+```
+Cliente Clica "Gerar Código 2FA"
+            ↓
+generateClientCode()
+            ↓
+Gera Código Random (6 dígitos)
+Define Expiração (+15 minutos)
+            ↓
+appState.activeClientCode = code
+appState.activeClientCodeExpiry = expiresAt
+            ↓
+Registra no Histórico de Códigos
+            ↓
+saveClientCodesHistory() → localStorage
+            ↓
+Exibe Código Ativo com Timer
+            ↓
+startClientCodeTimer() (countdown visual)
+            ↓
+Cliente Copia Código (botão "Copiar")
+            ↓
+[Prestador usa código no fluxo normal]
+            ↓
+validate2FACode()
+    │
+    ├─ Verifica código QR (normal)
+    │
+    └─ Verifica código do cliente (activeClientCode)
+            │
+            └─ Se válido → appState.usedClientCode = true
+                            ↓
+                    performPresenceValidation()
+                    (ignora validações de distância e horário)
+```
+
+### 3️⃣ Fluxo de Senha Mestre
+
+```
+Prestador Clica "Usar Token sem QR Code"
+            ↓
+Exibe Modal de Senha Mestre
+            ↓
+showMasterPasswordModal()
+            ↓
+Prestador Digita "mestre2024"
+            ↓
+validateMasterPassword()
+     │
+     ├─ Senha Incorreta → Alerta
+     │
+     └─ Senha Correta → appState.usedClientCode = true
+                          ↓
+                    getUserLocation() (opcional)
+                          ↓
+                    performPresenceValidation()
+                    (ignora todas as validações)
 ```
 
 ---
@@ -95,30 +162,44 @@ validate2FACode()
 ### 1. **DATA LAYER** (Dados)
 
 ```javascript
-USER = {
-  name,
-  matricula,
-  location: {
-    address,
-    lat,
-    lon,
-    radiusInMeters
+// Array de 8 usuários/prestadores
+USERS = [
+  {
+    name: string,
+    matricula: string,
+    location: {
+      address: string,
+      lat: number,
+      lon: number,
+      radiusInMeters: number (150 padrão)
+    },
+    contract: {
+      entryTime: "HH:MM",
+      exitTime: "HH:MM",
+      entryWindow: { before: hours, after: hours },
+      exitWindow: { before: hours, after: hours }
+    }
   },
-  contract: {
-    entryTime,
-    exitTime,
-    entryWindow: { before, after },
-    exitWindow: { before, after }
-  }
-}
+  // ... 7 outros usuários
+]
 
 appState = {
+  selectedUserIndex: number (0-7),
   checkedIn: boolean,
+  checkinTime: Date | null,
+  checkoutTime: Date | null,
   currentQRData: object | null,
   currentCode: string | null,
   userLocation: { lat, lon } | null,
-  presenceHistory: []
+  presenceHistory: [],
+  activeClientCode: string | null,
+  activeClientCodeExpiry: Date | null,
+  clientCodesHistory: [],
+  usedClientCode: boolean
 }
+
+// Senha mestre do cliente
+MASTER_PASSWORD = "mestre2024"
 ```
 
 ### 2. **BUSINESS LOGIC LAYER** (Validações)
@@ -135,15 +216,17 @@ Saída: Distância em metros
 Entrada: distance, radius
 Validação: distance <= radius
 Saída: { valid: boolean, distance: number, message: string }
+Override: usedClientCode = true → sempre válido
 ```
 
 #### Função: validateTimeWindow()
 ```
-Entrada: currentTime, scheduledTime, isEntry
+Entrada: currentTime, entryTime, exitTime, isEntry
 Cálculo: 
-  - Se ENTRADA: window = [scheduled - 1h] até [scheduled + 3h]
-  - Se SAÍDA: window = [scheduled - 2h] até [scheduled + 2h]
+  - Se ENTRADA: window = [scheduled - before*60] até [scheduled + after*60]
+  - Se SAÍDA: window = [scheduled - before*60] até [scheduled + after*60]
 Saída: { valid: boolean, windowStart, windowEnd, message }
+Override: usedClientCode = true → sempre válido
 ```
 
 #### Função: generateRandomCode()
@@ -151,26 +234,80 @@ Saída: { valid: boolean, windowStart, windowEnd, message }
 Entrada: none
 Processo: Math.random() * 1000000 → padStart(6, '0')
 Saída: string de 6 dígitos
+Uso: QR Code (45s) e Cliente (15 min)
 ```
 
 #### Função: determineCheckType()
 ```
-Entrada: currentTime
-Lógica: Compara distância para horário entrada vs saída
+Entrada: currentTime, appState.checkedIn
+Lógica: Se já fez checkin (e não fez checkout), retorna SAÍDA, senão ENTRADA
 Saída: "ENTRADA" | "SAÍDA"
+```
+
+#### Função: generateClientCode()
+```
+Entrada: none
+Processo: 
+  - Gera código 6 dígitos
+  - Define expiração (+15 min)
+  - Salva em activeClientCode
+  - Registra em clientCodesHistory
+Saída: void (atualiza UI)
+```
+
+#### Função: validateMasterPassword()
+```
+Entrada: password input
+Validação: input === "mestre2024"
+Saída: Se válido, faz checkin direto com usedClientCode = true
 ```
 
 ### 3. **PRESENTATION LAYER** (View)
 
-**HTML Structure:**
+**Interface com Abas (4 telas):**
 ```
-div.container
-├── header
-├── div.main-content
-│   ├── aside.left-panel (Usuário, contrato, horários)
-│   └── main.right-panel (Scan, 2FA, validação)
-├── section.history-section
-└── footer
+nav.tabs
+├── btn[data-target="screenQR"]      → Checkin/QRCode
+├── btn[data-target="screenClient"]  → Painel do Cliente
+├── btn[data-target="screenContract"]→ Contrato / Usuário
+└── btn[data-target="screenHistory"] → Histórico
+```
+
+**HTML Structure por Tela:**
+```
+TELA 1: screenQR (Checkin/QRCode)
+├── Status Atual (badge + mensagem dinâmica)
+├── Simulação QR Code + botão Scan
+├── Seção Senha Mestre
+├── Modal 2FA (Bootstrap 5.3)
+│   ├── Timer countdown (45s)
+│   ├── Código gerado (display)
+│   └── Input para validação
+└── Modal Resultado (Bootstrap 5.3)
+    └── Grid de validação
+
+TELA 2: screenClient (Painel do Cliente)
+├── Card Info do Cliente
+├── Botão Gerar Código 2FA
+├── Card Código Ativo (se existir)
+│   ├── Display do código
+│   ├── Timer de expiração (15 min)
+│   ├── Botão Copiar
+│   └── Botão Revogar
+└── Tabela Histórico de Códigos
+
+TELA 3: screenContract (Contrato)
+├── Select de Prestador (8 opções)
+└── Painéis informativos
+    ├── Dados do Usuário
+    ├── Contrato Atual
+    ├── Horários
+    └── Janelas de Validação
+
+TELA 4: screenHistory (Histórico)
+└── Tabela de Registros
+    ├── 9 colunas (data, nome, matrícula, tipo, dist, etc)
+    └── Coloração por status (verde/vermelho)
 ```
 
 **CSS Utilities:**
@@ -179,12 +316,18 @@ div.container
 - CSS Variables para tema
 - Animações para feedback visual
 - Media queries para mobile
+- Bootstrap 5.3 para modais
 
 ### 4. **STORAGE LAYER** (Persistência)
 
 ```javascript
+// Histórico de Presença
 localStorage.setItem('presenceHistory', JSON.stringify(history))
 localStorage.getItem('presenceHistory') → JSON.parse()
+
+// Histórico de Códigos do Cliente
+localStorage.setItem('clientCodesHistory', JSON.stringify(codes))
+localStorage.getItem('clientCodesHistory') → JSON.parse()
 ```
 
 ---
@@ -193,15 +336,141 @@ localStorage.getItem('presenceHistory') → JSON.parse()
 
 ```
 1. LOAD (DOMContentLoaded)
-   ├─ init()
+   ├─ Inicializar Bootstrap Modals
+   ├─ populateUserSelect() (8 usuários)
+   ├─ updateContractInfo()
    ├─ getPresenceHistory() from localStorage
+   ├─ getClientCodesHistory() from localStorage
    ├─ updateStatus()
    ├─ updateHistoryTable()
-   └─ setInterval(updateStatus, 1000) // Atualiza hora
+   ├─ updateClientCodesHistory()
+   ├─ setInterval(updateStatus, 1000) // Atualiza status a cada 1s
+   └─ Registrar Event Listeners
 
-2. INTERACTION (User Click)
+2. INTERACTION - Navegação
+   ├─ tab-btn.click() → switchScreen(targetId)
+   │   ├─ Oculta todas as screens
+   │   ├─ Mostra screen target
+   │   └─ Atualiza classes das tabs
+
+3. INTERACTION - Checkin Normal
    ├─ scanQRBtn.click()
    ├─ simulateQRCodeScan()
    ├─ getUserLocation()
-   ├─ Exibe 2FA
+   ├─ startTimer(45s)
+   ├─ show2FAModal()
+   ├─ validateCodeBtn.click()
+   └─ performPresenceValidation()
+
+4. INTERACTION - Painel Cliente
+   ├─ generateClientCodeBtn.click()
+   ├─ generateClientCode()
+   ├─ startClientCodeTimer() (15 min)
+   ├─ updateClientCodeDisplay() (cada 1s)
+   ├─ copyCodeBtn.click() → Clipboard API
+   └─ revokeCodeBtn.click() → revokeClientCode()
+
+5. INTERACTION - Senha Mestre
+   ├─ masterPasswordBtn.click()
+   ├─ showMasterPasswordModal()
+   ├─ validateMasterPasswordBtn.click()
+   ├─ validateMasterPassword()
+   └─ performPresenceValidation() (bypass validations)
+
+6. INTERACTION - Trocar Usuário
+   ├─ userSelect.change()
+   ├─ appState.selectedUserIndex = newIndex
+   ├─ Reset checkin/checkout state
+   ├─ updateContractInfo()
+   └─ updateStatus()
+
+7. TIMERS & INTERVALS
+   ├─ updateStatus() → cada 1000ms
+   ├─ timerInterval (QR Code) → cada 1000ms (45s total)
+   └─ clientCodeTimerInterval → cada 1000ms (15 min total)
 ```
+
+---
+
+## 🎯 Decisões de Design
+
+### Por que Bootstrap 5.3?
+- Modais prontos e responsivos
+- Componentes acessíveis
+- Reduz código CSS customizado
+- Familiar para desenvolvedores
+
+### Por que localStorage?
+- Protótipo não necessita backend
+- Dados persistem entre sessões
+- Simples de implementar
+- Fácil de migrar para API posteriormente
+
+### Por que múltiplos usuários?
+- Simula ambiente real multi-prestador
+- Testa diferentes configurações de horário
+- Demonstra escalabilidade
+- Facilita testes com diversos cenários
+
+### Por que Timer Visual?
+- Feedback imediato ao usuário
+- Senso de urgência (45s QR, 15 min Cliente)
+- Previne confusão sobre expiração
+- Melhora UX significativamente
+
+### Por que Código do Cliente?
+- Situações excepcionais (emergências, problemas técnicos)
+- Flexibilidade para o cliente autorizar
+- Rastreabilidade (registrado no histórico)
+- Mantém audit trail
+
+### Por que Senha Mestre?
+- Fallback quando QR Code não funciona
+- Override para situações críticas
+- Simplicidade de uso
+- Controle total do cliente
+
+---
+
+## 📊 Estatísticas do Código
+
+- **Total de linhas**: ~1600 (HTML: 367, JS: 1010, CSS: ~220)
+- **Funções principais**: 30+
+- **Usuários cadastrados**: 8
+- **Tipos de validação**: 3 (normal, cliente, mestre)
+- **Modais**: 3 (2FA, Resultado, Senha Mestre)
+- **Telas**: 4 (Checkin, Cliente, Contrato, Histórico)
+- **localStorage keys**: 2 (presenceHistory, clientCodesHistory)
+- **Timers**: 3 (status, QR, cliente)
+
+---
+
+## 🔐 Segurança e Validações
+
+### Níveis de Segurança
+
+**Nível 1: Máxima Segurança (QR Code Normal)**
+- ✅ Validação de geolocalização (raio 150m)
+- ✅ Validação de janela temporal
+- ✅ Código 2FA (45 segundos)
+- ✅ Registrado como validação normal
+
+**Nível 2: Segurança Moderada (Código Cliente)**
+- ❌ Sem validação de geolocalização
+- ❌ Sem validação temporal
+- ✅ Código 2FA (15 minutos)
+- ✅ Registrado como "usou código do cliente"
+- ⚠️ Rastreável no histórico
+
+**Nível 3: Override Completo (Senha Mestre)**
+- ❌ Sem validação de geolocalização
+- ❌ Sem validação temporal
+- ⚠️ Apenas senha simples
+- ✅ Registrado como "usou código do cliente"
+- ⚠️ Rastreável no histórico
+
+---
+
+**Versão**: 2.0  
+**Última Atualização**: 2026-03-03  
+**Status**: Documentação Completa e Atualizada

@@ -1,17 +1,22 @@
-# 🧪 Guia de Testes - Sistema de Checkin/Checkout
+# 🧪 Guia de Testes - Sistema de Checkin/Checkout v2.0
 
 ## 🎬 Passo a Passo para Demonstração
 
 ### Preparação Inicial
 
-1. **Abra o arquivo `index.html` no navegador**
+1. **Abra o arquivo `src/html/index.html` no navegador**
    - Clique duplo no arquivo ou arraste para o navegador
-   - A página deve carregar com o layout completo
+   - A página deve carregar com o layout completo e 4 abas
 
 2. **Permita acesso à localização**
    - Quando clicar no botão de scan, o navegador solicitará permissão
    - Clique em "Permitir" para usar sua localização real
    - Se negar, o sistema simula uma localização próxima (~50m)
+
+3. **8 Usuários Disponíveis**
+   - O sistema possui 8 prestadores pré-cadastrados
+   - Cada um com horários e locais diferentes
+   - Use a aba "Contrato / Usuário" para trocar entre eles
 
 ---
 
@@ -19,18 +24,20 @@
 
 ### Cenário
 - Horário: Entre 07:00 e 11:00 (janela de entrada)
-- Localização: Dentro de 100 metros do ponto base
+- Localização: Dentro de 150 metros do ponto base
 
 ### Passos
 1. Abra o sistema
 1.1. Use as abas no topo para alternar entre as telas:
 - **Checkin/QRCode** (primeira aba) para validação
-- **Contrato / Usuário** (segunda aba) para ver informações do contrato
-- **Histórico** (terceira aba) para ver registros anteriores
+- **Painel do Cliente** (segunda aba) para gerar códigos especiais
+- **Contrato / Usuário** (terceira aba) para ver informações do contrato
+- **Histórico** (quarta aba) para ver registros anteriores
 1.2 Observe a mensagem de status acima que instruirá realizar "checkin" ou "checkout" conforme a janela de validação atual.
 2. Com a aba **Checkin/QRCode** ativa, clique em **"🔍 Simular Leitura de QR Code"**
 3. Permita acesso à localização
-3.1. Um modal de autenticação 2FA surgirá solicitando o código.
+3.1. Um **modal Bootstrap** de autenticação 2FA surgirá solicitando o código.
+3.2. Observe o timer de **45 segundos** contando regressivamente
 4. Um código 2FA de 6 dígitos aparecerá (ex: `234567`)
 5. Copie o código mostrado e cole no campo de entrada
 6. Clique em **"✓ Validar Código"**
@@ -40,7 +47,7 @@
 ✓ ENTRADA VALIDADO COM SUCESSO!
 
 Validações:
-- Distância: ~50.45 m ✓ (dentro de 100m)
+- Distância: ~50.45 m ✓ (dentro de 150m)
 - Horário: 08:30 ✓ (dentro de 07:00-11:00)
 - Status: OK
 ```
@@ -51,13 +58,13 @@ Validações:
 
 ### Cenário
 - Horário: 12:30 (fora da janela de entrada 07:00-11:00)
-- Localização: Dentro de 100 metros
+- Localização: Dentro de 150 metros
 
 ### Passos
 1. Abra o sistema
 2. Ajuste a hora do seu computador para 12:30 (ou simule alterando o sistema)
 3. Clique em **"🔍 Simular Leitura de QR Code"**
-4. Digite o código 2FA mostrado
+4. Digite o código 2FA mostrado no modal
 5. Clique em **"✓ Validar Código"**
 
 ### Resultado Esperado
@@ -65,7 +72,7 @@ Validações:
 ✗ ENTRADA INVÁLIDO - Verifique distância e horário
 
 Validações:
-- Distância: ~50.45 m ✓ (dentro de 100m)
+- Distância: ~50.45 m ✓ (dentro de 150m)
 - Horário: 12:30 ✗ (fora de 07:00-11:00)
 - Status: NOK
 ```
@@ -76,13 +83,13 @@ Validações:
 
 ### Cenário
 - Horário: Entre 15:00 e 19:00 (janela de saída)
-- Localização: Dentro de 100 metros
+- Localização: Dentro de 150 metros
 
 ### Passos
 1. Ajuste a hora do seu computador para 17:30
 2. Clique em **"🔍 Simular Leitura de QR Code"**
 3. O sistema detectará automaticamente como SAÍDA (por estar próximo de 17:00)
-4. Digite o código 2FA mostrado
+4. Digite o código 2FA mostrado no modal Bootstrap
 5. Clique em **"✓ Validar Código"**
 
 ### Resultado Esperado
@@ -90,7 +97,7 @@ Validações:
 ✓ SAÍDA VALIDADO COM SUCESSO!
 
 Validações:
-- Distância: ~50.45 m ✓ (dentro de 100m)
+- Distância: ~50.45 m ✓ (dentro de 150m)
 - Horário: 17:30 ✓ (dentro de 15:00-19:00)
 - Status: OK
 ```
@@ -100,16 +107,16 @@ Validações:
 ## 🧭 Teste 4: Localização Fora do Raio
 
 ### Cenário
-- Localização: Mais de 100 metros do ponto base
+- Localização: Mais de 150 metros do ponto base
 - Horário: Dentro da janela válida
 
 ### Como Simular
 1. **Opção 1**: Se estiver em uma localização diferente de Joinville/SC, naturalmente estará fora do raio
-2. **Opção 2**: Editar temporariamente o arquivo `app.js` para mudar as coordenadas base:
+2. **Opção 2**: Editar temporariamente o arquivo `src/js/app.js` para mudar as coordenadas base:
    ```javascript
-   // Antes de USER.location.lat = -26.253337;
+   // Antes de USERS[0].location.lat = -26.253337;
    // Mude para:
-   USER.location.lat = 0; // Equador (muito longe)
+   USERS[0].location.lat = 0; // Equador (muito longe)
    ```
 
 ### Resultado Esperado
@@ -117,7 +124,7 @@ Validações:
 ✗ ENTRADA INVÁLIDO - Verifique distância e horário
 
 Validações:
-- Distância: 2.945.820,50 m ✗ (fora de 100m)
+- Distância: 2.945.820,50 m ✗ (fora de 150m)
 - Horário: 08:15 ✓ (dentro de 07:00-11:00)
 - Status: NOK
 ```
@@ -148,12 +155,12 @@ A validação não prossegue
 ## ⏰ Teste 6: Código 2FA Expirado
 
 ### Cenário
-- Simular espera de 5+ minutos após scan do QR code
+- Simular espera de 45+ segundos após scan do QR code
 
 ### Passos
 1. Clique em **"🔍 Simular Leitura de QR Code"**
-2. Não faça nada e espere 5 minutos
-3. Tente inserir o código
+2. Não faça nada e aguarde o timer zerar (45 segundos)
+3. Tente inserir o código após o timer expirar
 
 ### Resultado Esperado
 ```
@@ -162,50 +169,210 @@ Formulário retorna ao estado inicial
 Necessário novo scan
 ```
 
+---
 
+## 🎯 Teste 7: Painel do Cliente - Gerar Código
+
+### Cenário
+- Cliente gera código especial que bypassa validações de localização e horário
+
+### Passos
+1. Clique na aba **"🎯 Painel do Cliente"**
+2. Clique em **"✨ Gerar Código 2FA"**
+3. Observe o código gerado e a validade (15 minutos)
+4. Clique em **"📋 Copiar"** para copiar o código
+5. Volte à aba **"📱 Checkin/QRCode"**
+6. Clique em **"🔍 Simular Leitura de QR Code"**
+7. Cole o código do cliente no campo
+8. Clique em **"✓ Validar Código"**
+
+### Resultado Esperado
+```
+✓ ENTRADA VALIDADO COM SUCESSO!
+[Código gerado pelo cliente]
+
+Validações:
+- Código do Cliente: ✓ VÁLIDO
+- Status: OK
+- Restrições de horário e localização: IGNORADAS
+```
+
+**Observação**: O histórico mostrará `[Cliente]` na coluna de observações.
+
+---
+
+## 🔐 Teste 8: Senha Mestre - Override Total
+
+### Cenário
+- Supervisor usa senha mestre para acesso total sem restrições
+
+### Passos
+1. Na aba **"📱 Checkin/QRCode"**
+2. Clique em **"Usar Token sem QR Code"**
+3. Um modal Bootstrap solicitará a senha mestre
+4. Digite: `mestre2024`
+5. Clique em **"Validar Token"**
+
+### Resultado Esperado
+```
+✓ ENTRADA VALIDADO COM SUCESSO!
+[TOKEN MESTRE]
+
+Validações:
+- Token Mestre: ✓ VÁLIDO
+- Status: OK
+- Todas as restrições: IGNORADAS
+```
+
+**Observação**: O histórico mostrará `Master Override` nas observações.
+
+---
+
+## 🚫 Teste 9: Senha Mestre Incorreta
+
+### Cenário
+- Tentativa com senha mestre errada
+
+### Passos
+1. Clique em **"Usar Token sem QR Code"**
+2. Digite uma senha incorreta (ex: `senha123`)
+3. Clique em **"Validar Token"**
+
+### Resultado Esperado
+```
+Alerta: "Token inválido!"
+Modal fecha automaticamente
+Nenhum checkin realizado
+```
+
+---
+
+## ⏱️ Teste 10: Código Cliente Expirado
+
+### Cenário
+- Código do cliente gerado há mais de 15 minutos
+
+### Passos
+1. Vá ao **Painel do Cliente** e gere um código
+2. Anote a hora de expiração
+3. Ajuste o relógio do sistema para passar de 15 minutos
+4. Tente usar o código expirado
+
+### Resultado Esperado
+```
+Alerta: "Código expirado!"
+Validação falha
+Necessário gerar novo código
+```
 
 ---
 
 ## 📊 Teste 7: Histórico de Presença
 
 ### Cenário
-- Realizar múltiplos checklins/checkouts
+- Realizar múltiplos checkins/checkouts
 - Verificar persistência dos dados
 
 ### Passos
-1. Realize 3-4 checklins com sucesso
+1. Realize 3-4 checkins com sucesso
 2. Feche e reabra o navegador (ou F5)
-3. Verifique a tabela de histórico
+3. Vá para a aba **"📋 Histórico"**
+4. Verifique a tabela de histórico
 
 ### Resultado Esperado
 ```
-- Tabela mostra todos os registros
+- Tabela mostra todos os registros com 9 colunas
 - Dados persistem após refresh
 - Ordenação: do mais recente para o mais antigo
 - Status visual de OK/NOK visível
+- Coluna de observações mostra: padrão, [Cliente], ou Master Override
 ```
 
 ---
 
-## 🎯 Testes de Compatibilidade
+## 👥 Teste 11: Múltiplos Usuários
 
-### Janela de Entrada
-| Hora | Válida? | Status |
-|------|---------|--------|
-| 06:45 | ❌ | Muito cedo |
-| 07:00 | ✓ | Limite inferior |
-| 08:00 | ✓ | Horário previsto |
-| 11:00 | ✓ | Limite superior |
-| 11:15 | ❌ | Muito tarde |
+### Cenário
+- Testar a funcionalidade de troca de usuário
 
-### Janela de Saída
-| Hora | Válida? | Status |
-|------|---------|--------|
-| 14:45 | ❌ | Muito cedo |
-| 15:00 | ✓ | Limite inferior |
-| 17:00 | ✓ | Horário previsto |
-| 19:00 | ✓ | Limite superior |
-| 19:15 | ❌ | Muito tarde |
+### Passos
+1. Na aba **"📝 Contrato / Usuário"**
+2. Selecione **Bruno Reichembak (001)** no dropdown
+3. Observe os dados de localização e horário
+4. Selecione **Maria Souza (002)**
+5. Observe que os dados mudaram
+6. Volte à aba **"📱 Checkin/QRCode"**
+7. Faça um checkin
+8. Vá para o histórico e veja o registro com o nome do novo usuário
+
+### Resultado Esperado
+```
+- Cada usuário possui:
+  - Nome único
+  - Matrícula única
+  - Endereço diferente
+  - Coordenadas diferentes
+  - Horários diferentes
+- Histórico registra o nome correto do usuário
+```
+
+---
+
+## 🎯 Testes de Compatibilidade (Bruno Reichembak - 001)
+
+### Janela de Entrada (Base: 07:00)
+| Hora | Válida? | Status | Janela |
+|------|---------|--------|--------|
+| 05:45 | ❌ | Muito cedo | Fora da janela |
+| 06:00 | ✓ | Limite inferior | 1h antes |
+| 07:00 | ✓ | Horário previsto | Exato |
+| 09:00 | ✓ | Dentro da janela | 2h depois |
+| 10:00 | ✓ | Limite superior | 3h depois |
+| 10:15 | ❌ | Muito tarde | Fora da janela |
+
+### Janela de Saída (Base: 17:00)
+| Hora | Válida? | Status | Janela |
+|------|---------|--------|--------|
+| 14:45 | ❌ | Muito cedo | Fora da janela |
+| 15:00 | ✓ | Limite inferior | 2h antes |
+| 17:00 | ✓ | Horário previsto | Exato |
+| 18:00 | ✓ | Dentro da janela | 1h depois |
+| 19:00 | ✓ | Limite superior | 2h depois |
+| 19:15 | ❌ | Muito tarde | Fora da janela |
+
+### Validação de Distância
+| Distância | Válida? | Status |
+|-----------|---------|--------|
+| 0m | ✓ | Exato |
+| 50m | ✓ | Próximo |
+| 100m | ✓ | Perto |
+| 149m | ✓ | Limite |
+| 150m | ✓ | Limite exato |
+| 151m | ❌ | Fora |
+| 500m | ❌ | Muito longe |
+| 1000m+ | ❌ | Extremamente longe |
+
+## 🐛 Troubleshooting
+
+| Problema | Solução |
+|----------|---------|
+| Geolocalização não funciona | Verifique se deu permissão ao navegador |
+| | Alguns navegadores private/incognito podem bloquear |
+| | Repositório HTTPS pode ser requerido (não necessário em localhost) |
+| Código 2FA não valida | Certifique-se de digitar todos os 6 dígitos |
+| | Verifique se o código não expirou (45 segundos) |
+| | Console mostrará erros se houver |
+| Modais não abrem | Verifique conexão CDN do Bootstrap 5.3 |
+| | Abra o console (F12) para ver erros |
+| Histórico vazio após refresh | Verifique se localStorage está habilitado |
+| | Alguns navegadores private/incognito podem desabilitar |
+| | Use `localStorage.getItem('presenceHistory')` no console |
+| Distância sempre 0 | Isso é normal se usar a mesma localização |
+| | Mude sua localização ou altere coordenadas no código |
+| Senha mestre não funciona | Verifique se digitou `mestre2024` exatamente |
+| | Senha é case-sensitive |
+| Código cliente não funciona | Verifique se não expirou (15 minutos) |
+| | Gere um novo código se necessário |
 
 ---
 
@@ -214,11 +381,17 @@ Necessário novo scan
 Abra o console do navegador (F12) para debug:
 
 ```javascript
-// Ver dados do usuário
-console.log(USER);
+// Ver todos os usuários cadastrados
+console.log(USERS);
+
+// Ver usuário atual
+console.log(appState.currentUser);
 
 // Ver histórico de presença
 console.log(appState.presenceHistory);
+
+// Ver histórico de códigos do cliente
+console.log(appState.clientCodeHistory);
 
 // Ver localização do usuário
 console.log(appState.userLocation);
@@ -228,41 +401,53 @@ localStorage.clear();
 
 // Ver histórico salvo no localStorage
 console.log(JSON.parse(localStorage.getItem('presenceHistory')));
+console.log(JSON.parse(localStorage.getItem('clientCodeHistory')));
 ```
 
 ---
 
 ## 🎨 Personalizações para Demonstração
 
-### Alterar Dados do Usuário
-Edite `app.js` linha 10:
+### Alterar/Adicionar Usuários
+Edite `src/js/app.js` linhas ~5-139:
 ```javascript
-const USER = {
-    name: 'Seu Nome',
-    matricula: '002',
-    // ... resto dos dados
-};
+const USERS = [
+    {
+        name: 'Seu Nome',
+        matricula: '009',
+        location: {
+            address: 'Seu endereço',
+            lat: -26.253337,  // Sua latitude
+            lon: -48.841455,  // Sua longitude
+            radiusInMeters: 150
+        },
+        contract: {
+            entryTime: '09:00',  // Novo horário de entrada
+            exitTime: '18:00',   // Novo horário de saída
+            entryWindow: { before: 1, after: 2 },
+            exitWindow: { before: 1, after: 1 }
+        }
+    },
+    // ... outros usuários
+];
 ```
 
-### Alterar Localização
-Edite `app.js` linha 15:
+### Alterar Senha Mestre
+Edite `src/js/app.js` linha ~976:
 ```javascript
-location: {
-    address: 'Novo endereço',
-    lat: -26.253337,  // Sua latitude
-    lon: -48.841455,  // Sua longitude
-    radiusInMeters: 100
-}
+const MASTER_PASSWORD = 'novaSenha123';
 ```
 
-### Alterar Horários
-Edite `app.js` linha 23:
+### Alterar Timer de Código QR
+Edite `src/js/app.js` linha ~309:
 ```javascript
-contract: {
-    entryTime: '09:00',  // Novo horário de entrada
-    exitTime: '18:00',   // Novo horário de saída
-    // ... janelas de tempo
-}
+timerSeconds = 60; // Muda de 45 para 60 segundos
+```
+
+### Alterar Validade Código Cliente
+Edite `src/js/app.js` linha ~666:
+```javascript
+const expiresAt = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutos
 ```
 
 ---
@@ -285,52 +470,68 @@ contract: {
 
 ---
 
-## 🐛 Troubleshooting
+## ✅ Checklist de Demonstração v2.0
 
-### Geolocalização não funciona
-- ✓ Verifique se deu permissão ao navegador
-- ✓ Alguns navegadores private/incognito podem bloquear
-- ✓ Repositório HTTPS pode ser requerido (não necessário em localhost)
-
-### Código 2FA não valida
-- ✓ Certifique-se de digitar todos os 6 dígitos
-- ✓ Verifique se o código não expirou (5 minutos)
-- ✓ Console mostrará erros se houver
-
-### Histórico vazio após refresh
-- ✓ Verifique se localStorage está habilitado
-- ✓ Alguns navegadores private/incognito podem desabilitar
-- ✓ Use `localStorage.getItem('presenceHistory')` no console para debug
-
-### Distância sempre 0
-- ✓ Isso é normal se usar a mesma localização
-- ✓ Mude sua localização ou altere coordenadas no código para testar
-
----
-
-## ✅ Checklist de Demonstração
-
+### Básico
 - [ ] Sistema abre sem erros
+- [ ] 4 abas funcionam corretamente
 - [ ] Botão de QR Code funciona
+- [ ] Modais Bootstrap abrem corretamente
 - [ ] Código 2FA é gerado aleatoriamente
+- [ ] Timer de 45s funciona
 - [ ] Validação de código funciona
 - [ ] Resultados de validação exibem corretamente
+
+### Avançado
+- [ ] Painel do Cliente gera códigos
+- [ ] Botão copiar funciona
+- [ ] Código cliente bypassa restrições
+- [ ] Histórico de códigos é exibido
+- [ ] Senha mestre funciona (mestre2024)
+- [ ] Senha mestre incorreta é rejeitada
+
+### Multiu suário
+- [ ] Troca de usuário funciona
+- [ ] Cada usuário tem dados próprios
+- [ ] Horários diferentes são validados
+- [ ] Locais diferentes são validados
+
+### Persistência
 - [ ] Histórico lista registros
 - [ ] Dados persistem após refresh
+- [ ] localStorage funciona
+
+### Validações
 - [ ] Janelas de tempo são respeitadas
-- [ ] Validação de distância funciona
+- [ ] Validação de distância funciona (150m)
 - [ ] Status atualiza em tempo real
+- [ ] Códigos expirados são rejeitados
+
+### Interface
 - [ ] Interface responsiva em diferentes tamanhos
+- [ ] Botões são clicáveis
+- [ ] Feedback visual funciona
 
 ---
 
 **Dicas para Demonstração Eficaz:**
 
-1. Comece com um teste bem-sucedido para mostrar o happy path
-2. Mostre o histórico crescendo com cada validação
-3. Demonstre validação de 2FA com código incorreto
-4. Mencione a persistência de dados recarregando a página
-5. Abra o console para mostrar a estrutura dos dados
-6. Explique as validações de distância e tempo
-7. Mencione como dados podem ser sincronizados com backend
+1. Comece com um teste bem-sucedido (QR Code) para mostrar o happy path
+2. Demonstre o Painel do Cliente e o bypass de restrições
+3. Mostre a senha mestre e o override total
+4. Demonstre validação de 2FA com código incorreto
+5. Mostre o histórico crescendo com cada validação
+6. Mencione a persistência de dados recarregando a página
+7. Troque de usuário para mostrar os 8 prestadores
+8. Abra o console para mostrar a estrutura dos dados
+9. Explique as validações de distância (150m) e tempo
+10. Mencione como dados podem ser sincronizados com backend
+
+---
+
+**Documento**: Guia de Testes  
+**Versão**: 2.0  
+**Data Criação**: 2026-02-26  
+**Última Atualização**: 2026-03-03  
+**Status**: ✅ COMPLETO E ATUALIZADO
 

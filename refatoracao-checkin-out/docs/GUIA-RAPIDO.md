@@ -4,14 +4,22 @@
 
 ```
 refatoracao-checkin-out/
-├── index.html              ← Abra este arquivo no navegador (ARQUIVO PRINCIPAL)
-├── style.css               ← Estilos (carregado automaticamente)
-├── app.js                  ← Lógica da aplicação (carregado automaticamente)
-├── README.md               ← Documentação completa
-├── TESTES.md               ← Guia de testes e demonstração
-├── ARQUITETURA.md          ← Detalhes técnicos
-├── ../data/dados-exemplo.json      ← Exemplos de dados e estrutura API
-└── GUIA-RAPIDO.md          ← Este arquivo
+├── src/
+│   ├── html/
+│   │   └── index.html          ← Abra este arquivo no navegador (ARQUIVO PRINCIPAL)
+│   ├── css/
+│   │   └── style.css           ← Estilos (carregado automaticamente)
+│   └── js/
+│       └── app.js              ← Lógica da aplicação (carregado automaticamente)
+├── README.md                   ← Documentação completa
+├── data/
+│   └── dados-exemplo.json      ← Exemplos de dados e estrutura API
+└── docs/
+    ├── GUIA-RAPIDO.md          ← Este arquivo
+    ├── COMECE.md
+    ├── TESTES.md
+    ├── ARQUITETURA.md
+    └── INDICE.md
 ```
 
 ---
@@ -19,19 +27,19 @@ refatoracao-checkin-out/
 ## ⚡ 3 Formas Rápidas de Abrir
 
 ### Opção 1: Clique Duplo (Recomendado para Windows)
-1. Vá até a pasta: `C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out`
+1. Vá até a pasta: `C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\src\html`
 2. Clique duplo no arquivo **`index.html`**
 3. Seu navegador padrão abrirá o protótipo
 
 ### Opção 2: Arrastar para o Navegador
 1. Abra seu navegador (Chrome, Firefox, Edge, Safari)
-2. Clique e arraste o arquivo **`index.html`** para a aba do navegador
+2. Clique e arraste o arquivo **`src/html/index.html`** para a aba do navegador
 3. O protótipo carregará
 
 ### Opção 3: Usar Terminal PowerShell
 ```powershell
 # Navegue até a pasta
-cd "C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out"
+cd "C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\src\html"
 
 # Abra o arquivo no navegador padrão
 Invoke-Item index.html
@@ -90,47 +98,126 @@ python -m http.server 8000
 
 ---
 
+## 🎯 Segundo Teste - Painel do Cliente (2 Minutos)
+
+1. **Clique na aba "🎯 Painel do Cliente"** ↓
+   
+   ![Painel do Cliente abre]
+
+2. **Clique no botão "✨ Gerar Código 2FA"** ↓
+   
+   ![Um código de 6 dígitos é gerado, válido por 15 minutos]
+
+3. **Clique em "📋 Copiar Código"** ↓
+   
+   ![Código copiado para clipboard]
+
+4. **Volte à aba "📱 Checkin/QRCode"** ↓
+
+5. **Clique em "🔍 Simular Leitura de QR Code"** ↓
+
+6. **Cole o código do cliente** (ao invés do código do QR) ↓
+
+7. **Clique em "✓ Validar Código"** ↓
+   
+   ![Resultado: ✅ VALIDADO automaticamente - sem validação de local ou horário!]
+
+8. **Veja no histórico** que o registro marca "usou código do cliente" ↓
+
+---
+
+## 🔑 Terceiro Teste - Senha Mestre (1 Minuto)
+
+1. **Na aba "📱 Checkin/QRCode"** ↓
+
+2. **Clique no botão "Usar Token sem QR Code"** ↓
+   
+   ![Modal de Senha Mestre abre]
+
+3. **Digite a senha: mestre2024** ↓
+
+4. **Clique em "Validar Token"** ↓
+   
+   ![Checkin/Checkout realizado automaticamente - sem restrições!]
+
+5. **Veja no histórico** o registro com todas as validações ignoradas ↓
+
+---
+
 ## ✨ Características Demo
 
-### Painel Esquerdo (Informações)
-- 👤 Dados do usuário (João Silva, Matrícula 001)
-- 🏢 Endereço e coordenadas GPS
-- ⏰ Horários do contrato
-- ℹ️ Janelas de validação
+### 4 Telas Principais (Navegação por Abas)
 
-### Painel Central (Interação)
-- 📊 Status em tempo real
+**📱 Checkin/QRCode**
+- 📊 Status em tempo real e dinâmico
 - 📱 Simulação de QR Code
-- 🔐 Autenticação 2FA
+- 🔐 Autenticação 2FA (45 segundos)
+- 🔑 Opção de Senha Mestre
 - ✅ Validação multi-camadas
 
-### Painel Inferior (Histórico)
-- 📋 Tabela com todos os registros
+**🎯 Painel do Cliente**
+- ✨ Geração de Código 2FA (15 minutos)
+- 📋 Copiar código para clipboard
+- ⏱️ Timer de expiração visual
+- 🚫 Botão revogar código
+- 📜 Histórico de códigos gerados
+
+**📋 Contrato / Usuário**
+- 👥 Seletor de 8 prestadores
+- 👤 Dados do usuário selecionado
+- 🏢 Endereço e coordenadas GPS
+- ⏰ Horários do contrato
+- ℹ️ Janelas de validação específicas
+
+**🕒 Histórico**
+- 📋 Tabela com 9 colunas
 - 🔄 Dados persistem no navegador
-- 📊 Visualização completa de todas as tentativas
+- 🎨 Coloração por status (verde/vermelho)
+- 📊 Indica se usou código do cliente
 
 ---
 
 ## 🔧 Testar Diferentes Cenários
 
-### Teste 1: Entrada Válida ✓
-- Horário: 08:00 - 11:00 (entre 7:00-11:00) ✓
-- Localização: Dentro de 100m ✓
-- **Resultado: OK**
+### Teste 1: Entrada Válida (QR Code Normal) ✓
+- Usuário: Bruno Reichembak
+- Horário: 07:15 (entre 06:00-10:00) ✓
+- Localização: Dentro de 150m ✓
+- **Resultado: ✅ VALIDADO**
 
-### Teste 2: Entrada Inválida (Horário)
-- Horário: 12:00 (fora de 7:00-11:00) ✗
-- Localização: Dentro de 100m ✓
-- **Resultado: NOK - Fora da janela**
+### Teste 2: Entrada Inválida (Horário) ✗
+- Horário: 12:00 (fora de 06:00-10:00) ✗
+- Localização: Dentro de 150m ✓
+- **Resultado: ❌ INVÁLIDO - Fora da janela**
 
-### Teste 3: Saída Válida
-- Horário: 17:00 - 19:00 (entre 15:00-19:00) ✓
-- Localização: Dentro de 100m ✓
-- **Resultado: OK**
+### Teste 3: Entrada Inválida (Distância) ✗
+- Horário: 07:15 (dentro) ✓
+- Localização: Longe, > 150m ✗
+- **Resultado: ❌ INVÁLIDO - Fora do raio**
 
-### Teste 4: Código 2FA Errado
-- Digite: 000000 (código diferente)
+### Teste 4: Saída Válida ✓
+- Horário: 17:00 - 18:00 (entre 15:00-19:00) ✓
+- Localização: Dentro de 150m ✓
+- **Resultado: ✅ VALIDADO**
+
+### Teste 5: Código 2FA Errado ✗
+- Digite: 000000 (código diferente do exibido)
 - **Resultado: Alerta "Código incorreto"**
+
+### Teste 6: Código do Cliente (Bypass)
+- Gere código no Painel do Cliente
+- Use esse código ao invés do QR
+- **Resultado: ✅ VALIDADO - sem restrições**
+
+### Teste 7: Senha Mestre (Override Completo)
+- Use "Token sem QR Code"
+- Digite: mestre2024
+- **Resultado: ✅ VALIDADO - sem restrições**
+
+### Teste 8: Múltiplos Usuários
+- Na aba "Contrato", troque de prestador
+- Cada um tem horários e locais diferentes
+- Teste diferentes janelas de validação
 
 ---
 
@@ -147,40 +234,89 @@ Para testar mobile, pressione **F12** → **Ctrl+Shift+M** (ou ⌘+Shift+M no Ma
 
 ## 📍 Dados do Protótipo
 
+### 8 Prestadores Cadastrados
+
 ```
-Usuário:        João Silva (Matrícula 001)
+1. Bruno Reichembak (001)  - Joinville/SC    - 07:00-17:00
+2. Maria Souza (002)       - São Paulo/SP    - 09:00-18:00
+3. Carlos Pereira (003)    - Rio de Janeiro  - 06:00-14:00
+4. Ana Costa (004)         - São Paulo/SP    - 12:00-20:00
+5. Pedro Santos (005)      - Curitiba/PR     - 20:00-04:00 (noturno)
+6. Lucia Martins (006)     - São Paulo/SP    - 05:00-13:00
+7. Roberto Alves (007)     - São Paulo/SP    - 10:00-18:00
+8. Fernanda Oliveira (008) - Belém/PA        - 07:00-15:00
+```
+
+### Usuário Padrão: Bruno Reichembak
+
+```
+Usuário:        Bruno Reichembak (Matrícula 001)
 Local:          Motorista PX, Rua Itajubá, 768
-                Joinville/SC
+                Bom Retiro, Joinville/SC
 Coordenadas:    Latitude: -26.253337
                 Longitude: -48.841455
-Raio:           100 metros
-Entrada:        08:00 (janela: 07:00-11:00)
+Raio:           150 metros
+Entrada:        07:00 (janela: 06:00-10:00)
+                1h antes + 3h depois
 Saída:          17:00 (janela: 15:00-19:00)
+                2h antes + 2h depois
+```
+
+### Credenciais de Acesso
+
+```
+Senha Mestre:   mestre2024
+Códigos 2FA:    Gerados automaticamente (6 dígitos)
+                - QR Code: 45 segundos
+                - Cliente: 15 minutos
 ```
 
 ---
 
 ## 🔐 2FA (Two-Factor Authentication)
 
-### Como Funciona:
-1. **Scan QR Code** 
-   - Simula leitura de um QR code
-   - Contém dados de localização e validação
+### Dois Tipos de Código 2FA:
 
-2. **Geração de Código Aleatório**
-   - 6 dígitos aleatórios (000000 - 999999)
-   - Muda a cada scan
-   - Expira em 5 minutos
+#### 1️⃣ Código QR (Validação Normal)
+- **Geração**: Ao clicar em "Simular QR Code"
+- **Validade**: 45 segundos
+- **Timer**: Countdown visual (verde → amarelo → vermelho)
+- **Validações**: Distância + Horário aplicadas
+- **Uso**: Checkin normal com todas as restrições
 
-3. **Validação Manual**
-   - Usuário digita os 6 dígitos
-   - Sistema valida se está correto
-   - Só depois disso faz as outras validações
+#### 2️⃣ Código Cliente (Bypass)
+- **Geração**: Painel do Cliente → "Gerar Código 2FA"
+- **Validade**: 15 minutos
+- **Timer**: Countdown visual no painel
+- **Validações**: IGNORADAS (❌ distância, ❌ horário)
+- **Uso**: Situações excepcionais
+- **Rastreabilidade**: Marcado no histórico
 
-4. **Validações Técnicas**
-   - Distância: até 100 metros
-   - Horário: dentro da janela permitida
-   - Resultado: OK ou NOK
+#### 3️⃣ Senha Mestre (Override Completo)
+- **Token**: mestre2024
+- **Validade**: Sempre válida
+- **Acesso**: Botão "Usar Token sem QR Code"
+- **Validações**: TODAS IGNORADAS
+- **Uso**: Emergências, problemas técnicos
+- **Rastreabilidade**: Marcado no histórico
+
+### Fluxo de Validação:
+
+```
+1. Scan QR Code / Gerar Código / Senha Mestre
+         ↓
+2. Sistema gera/solicita código 6 dígitos
+         ↓
+3. Usuário digita código
+         ↓
+4. Sistema valida código
+         ↓
+5a. Código QR    → Valida distância + horário
+5b. Código Cliente → Aprova automaticamente
+5c. Senha Mestre   → Aprova automaticamente
+         ↓
+6. Registra no histórico
+```
 
 ---
 
