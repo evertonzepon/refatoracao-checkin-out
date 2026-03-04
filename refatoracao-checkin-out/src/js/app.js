@@ -10,7 +10,7 @@ const USERS = [
             address: 'Motorista PX, Rua Itajubá, 768. Bom Retiro. Joinville/SC',
             lat: -26.253337,
             lon: -48.841455,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '07:00',
@@ -26,7 +26,7 @@ const USERS = [
             address: 'Contratada B, Avenida Central, 123. Centro. São Paulo/SP',
             lat: -23.55052,
             lon: -46.633308,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '09:00',
@@ -42,7 +42,7 @@ const USERS = [
             address: 'Prestador C, Rua das Flores, 45. Bairro Jardim. Rio de Janeiro/RJ',
             lat: -22.906847,
             lon: -43.172896,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '06:00',
@@ -58,7 +58,7 @@ const USERS = [
             address: 'Operadora A, Av. Paulista, 1000. Bela Vista. São Paulo/SP',
             lat: -23.561389,
             lon: -46.656722,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '12:00',
@@ -74,7 +74,7 @@ const USERS = [
             address: 'Gerente Noturno, Rua 25 de Dezembro, 500. Centro. Curitiba/PR',
             lat: -25.428355,
             lon: -49.267137,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '20:00',
@@ -90,7 +90,7 @@ const USERS = [
             address: 'Supervisora, Rua Dom Pedro I, 200. Saúde. São Paulo/SP',
             lat: -23.594982,
             lon: -46.618378,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '05:00',
@@ -106,7 +106,7 @@ const USERS = [
             address: 'Coordenador, Rua Vergueiro, 2000. Vila Mariana. São Paulo/SP',
             lat: -23.595873,
             lon: -46.616666,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '10:00',
@@ -122,7 +122,7 @@ const USERS = [
             address: 'Assistente, Rua Cinquenta, 1500. Zona Leste. Belém/PA',
             lat: -1.455271,
             lon: -48.476666,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '07:00',
@@ -153,7 +153,8 @@ let appState = {
     activeClientCode: null,
     activeClientCodeExpiry: null,
     clientCodesHistory: getClientCodesHistory(),
-    usedClientCode: false
+    usedClientCode: false,
+    clientCodeReason: null
 };
 
 // ============================
@@ -176,6 +177,8 @@ const elements = {
     validateMasterPasswordBtn: document.getElementById('validateMasterPasswordBtn'),
     modalMasterUserName: document.getElementById('modalMasterUserName'),
     modalMasterAddress: document.getElementById('modalMasterAddress'),
+    clientCodeReason: document.getElementById('clientCodeReason'),
+    reasonHelpText: document.getElementById('reasonHelpText'),
     generatedCode: document.getElementById('generatedCode'),
     twoFAInput: document.getElementById('twoFAInput'),
     validateCodeBtn: document.getElementById('validateCodeBtn'),
@@ -411,36 +414,95 @@ async function validate2FACode(){
     await performPresenceValidation();
 }
 
-
 // ============================
-// MASTER PASSWORD
+// ALTERNATIVE CHECKIN - CLIENT CODE
 // ============================
 
 function showMasterPasswordModal(){
     const u = getCurrentUser();
+    const nowStr = getCurrentTimeString();
+    const checkType = determineCheckType(nowStr);
+    const isEntry = checkType === 'ENTRADA';
+    
     elements.modalMasterUserName.textContent = u.name;
     elements.modalMasterAddress.textContent = u.location.address;
     elements.masterPasswordInput.value = '';
+    elements.clientCodeReason.value = '';
+    
+    // Preencher opções do select baseado no tipo de movimento
+    populateReasonOptions(isEntry);
+    
     bootstrapModalMaster.show();
     setTimeout(() => elements.masterPasswordInput.focus(), 300);
 }
 
+// Preencher opções de motivo dinamicamente
+function populateReasonOptions(isEntry){
+    const select = elements.clientCodeReason;
+    select.innerHTML = '<option value="">-- Selecione uma opção --</option>';
+    
+    let options = [];
+    const helpText = elements.reasonHelpText;
+    
+    if(isEntry){
+        helpText.textContent = 'Indique o motivo para este CHECKIN';
+        options = [
+            { value: 'CHECKIN_ROTA', label: 'Checkin em rota ou fora da origem liberado pelo cliente' },
+            { value: 'CHECKIN_ANTECIPADO', label: 'Checkin antecipado liberado pelo cliente' }
+        ];
+    } else {
+        helpText.textContent = 'Indique o motivo para este CHECKOUT';
+        options = [
+            { value: 'CHECKOUT_ROTA', label: 'Checkout em rota ou fora do destino liberado pelo cliente' },
+            { value: 'CHECKOUT_ANTECIPADO', label: 'Checkout antecipado liberado pelo cliente' },
+            { value: 'CHECKOUT_FINALIZACAO', label: 'Checkout de finalização de contrato liberado pelo cliente' }
+        ];
+    }
+    
+    options.forEach(opt => {
+        const optionEl = document.createElement('option');
+        optionEl.value = opt.value;
+        optionEl.textContent = opt.label;
+        select.appendChild(optionEl);
+    });
+}
+
 async function validateMasterPassword(){
     const input = elements.masterPasswordInput.value.trim();
+    const reason = elements.clientCodeReason.value.trim();
     
     if(!input){ 
-        alert('Digite a senha'); 
+        alert('Digite o código 2FA'); 
         return; 
     }
     
-    if(input !== MASTER_PASSWORD){ 
-        alert('Senha incorreta!'); 
+    if(!reason){ 
+        alert('Selecione um motivo para o checkin/checkout'); 
+        return; 
+    }
+    
+    // Verifica se o código digitado é um código 2FA ativo do cliente
+    const isValidClientCode = appState.activeClientCode && input === appState.activeClientCode && new Date() < appState.activeClientCodeExpiry;
+    
+    if(!isValidClientCode){ 
+        alert('Código 2FA inválido ou expirado!'); 
         elements.masterPasswordInput.value = '';
         return; 
     }
     
-    // Senha correta - fazer checkin/checkout com override de validações
-    appState.usedClientCode = true; // Usar mesmo override do cliente code
+    // Código válido - marcar como usado no histórico
+    const usedAt = new Date();
+    const codeIndex = appState.clientCodesHistory.findIndex(c => c.code === input && c.status === 'ATIVO');
+    if (codeIndex !== -1) {
+        appState.clientCodesHistory[codeIndex].usedAt = usedAt;
+        appState.clientCodesHistory[codeIndex].status = 'USADO';
+        saveClientCodesHistory();
+        updateClientCodesHistory();
+    }
+    
+    // Código válido - fazer checkin/checkout com override de validações
+    appState.usedClientCode = true;
+    appState.clientCodeReason = reason;
     bootstrapModalMaster.hide();
     
     // Obter localização do usuário
@@ -453,8 +515,9 @@ async function validateMasterPassword(){
     // Fazer validação de presença diretamente
     await performPresenceValidation();
     
-    // Resetar flag
+    // Resetar flags
     appState.usedClientCode = false;
+    appState.clientCodeReason = null;
 }
 
 // ============================
@@ -497,7 +560,8 @@ async function performPresenceValidation(){
         userLat:appState.userLocation.lat,
         userLon:appState.userLocation.lon,
         isValid,
-        usedClientCode: appState.usedClientCode
+        usedClientCode: appState.usedClientCode,
+        clientCodeReason: appState.clientCodeReason
     };
 
     appState.presenceHistory.push(record);
@@ -530,6 +594,8 @@ function showValidationResults(record){
     document.getElementById('resultDistanceStatus').innerHTML = `<span class="${record.distanceValid?'status-ok':'status-nok'}">${record.distanceStatus}</span>`;
     document.getElementById('resultTimeWindow').textContent = record.timeWindow;
     document.getElementById('resultTimeStatus').innerHTML = `<span class="${record.timeValid?'status-ok':'status-nok'}">${record.timeStatus}</span>`;
+    const reasonDisplay = record.usedClientCode ? getReasonLabel(record.clientCodeReason) : '-';
+    document.getElementById('resultReason').textContent = reasonDisplay;
     document.getElementById('finalResultMessage').textContent = record.isValid ? 'Presença validada com sucesso' : 'Falha na validação';
 }
 
@@ -543,18 +609,30 @@ function resetForm(message){
 // HISTÓRICO
 // ============================
 
+function getReasonLabel(reasonCode){
+    const reasons = {
+        'CHECKIN_ROTA': 'Checkin em rota/origem',
+        'CHECKIN_ANTECIPADO': 'Checkin antecipado',
+        'CHECKOUT_ROTA': 'Checkout em rota/destino',
+        'CHECKOUT_ANTECIPADO': 'Checkout antecipado',
+        'CHECKOUT_FINALIZACAO': 'Finalização de contrato'
+    };
+    return reasons[reasonCode] || '';
+}
+
 function updateHistoryTable(){
     const tbody = elements.historyTableBody;
     tbody.innerHTML='';
     if(appState.presenceHistory.length===0){
         const tr=document.createElement('tr');
-        tr.innerHTML='<td colspan="9" class="empty-message">Nenhum registro de presença ainda</td>';
+        tr.innerHTML='<td colspan="10" class="empty-message">Nenhum registro de presença ainda</td>';
         tbody.appendChild(tr);
         return;
     }
     appState.presenceHistory.sort((a,b) => b.dateTime - a.dateTime).forEach(rec=>{
         const tr=document.createElement('tr');
         tr.className = rec.isValid ? 'row-valid' : 'row-invalid';
+        const reasonDisplay = rec.usedClientCode ? getReasonLabel(rec.clientCodeReason) : '-';
         tr.innerHTML=`
             <td>${formatDateTime(rec.dateTime)}</td>
             <td>${rec.userName}</td>
@@ -564,6 +642,7 @@ function updateHistoryTable(){
             <td>${rec.distanceStatus}</td>
             <td>${rec.timeWindow}</td>
             <td>${rec.timeStatus}</td>
+            <td>${reasonDisplay}</td>
             <td><strong class="${rec.isValid?'status-ok':'status-nok'}">${rec.isValid?'VALIDADO':'INVALIDO'}</strong></td>
         `;
         tbody.appendChild(tr);
@@ -653,7 +732,8 @@ function generateClientCode(){
         code: code,
         generatedAt: now,
         expiresAt: expiresAt,
-        status: 'ATIVO'
+        status: 'ATIVO',
+        usedAt: null
     };
 
     appState.clientCodesHistory.unshift(record);
@@ -751,7 +831,7 @@ function updateClientCodesHistory(){
     
     if (appState.clientCodesHistory.length === 0) {
         const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="4" class="empty-message">Nenhum código gerado ainda</td>';
+        tr.innerHTML = '<td colspan="5" class="empty-message">Nenhum código gerado ainda</td>';
         tbody.appendChild(tr);
         return;
     }
@@ -760,14 +840,31 @@ function updateClientCodesHistory(){
         const tr = document.createElement('tr');
         const now = new Date();
         const isExpired = now >= rec.expiresAt;
-        const statusClass = isExpired || rec.status === 'EXPIRADO' ? 'status-nok' : 'status-ok';
-        const statusText = isExpired || rec.status === 'EXPIRADO' ? '❌ EXPIRADO' : '✅ ATIVO';
+        
+        // Determinar status
+        let statusClass, statusText;
+        if (rec.status === 'USADO') {
+            statusClass = 'status-ok';
+            statusText = '✅ USADO';
+        } else if (isExpired || rec.status === 'EXPIRADO') {
+            statusClass = 'status-nok';
+            statusText = '❌ EXPIRADO';
+        } else {
+            statusClass = 'status-ok';
+            statusText = '✅ ATIVO';
+        }
+        
+        // Mostrar quando foi usado
+        const usedAtText = rec.usedAt 
+            ? `<strong>${formatDateTime(rec.usedAt)}</strong>` 
+            : '<span style="color: var(--gray-400); font-style: italic;">Não utilizado</span>';
         
         tr.innerHTML = `
             <td>${formatDateTime(rec.generatedAt)}</td>
             <td><strong class="code-display">${rec.code}</strong></td>
             <td>${formatDateTime(rec.expiresAt)}</td>
             <td><strong class="${statusClass}">${statusText}</strong></td>
+            <td>${usedAtText}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -955,12 +1052,6 @@ function updateContractInfo(){
     document.getElementById('exitTime').textContent=u.contract.exitTime;
     document.getElementById('validationRadius').textContent=`${u.location.radiusInMeters} metros`;
 }
-
-// ============================
-// MASTER PASSWORD CONFIG
-// ============================
-
-const MASTER_PASSWORD = 'mestre2024'; // Senha mestre do cliente
 
 // ============================
 // Bootstrap Modals

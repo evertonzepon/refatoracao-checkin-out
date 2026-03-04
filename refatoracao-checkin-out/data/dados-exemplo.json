@@ -12,7 +12,7 @@
     "endereco": "Motorista PX, Rua Itajubá, 768. Bom Retiro. Joinville/SC",
     "latitude": -26.253337,
     "longitude": -48.841455,
-    "raio_validacao_metros": 100,
+    "raio_validacao_metros": 200,
     "horarios": {
       "entrada_prevista": "08:00",
       "saida_prevista": "17:00"

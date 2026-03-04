@@ -31,14 +31,14 @@ Parabéns! Você agora tem um **protótipo funcional completo** de um sistema de
 
 ### 🔐 Segurança & Autenticação
 - ✅ **Autenticação 2FA Dupla**: Código QR (45s) e Código Cliente (15 min)
-- ✅ **Senha Mestre**: Token "mestre2024" para bypass completo
+- ✅ **Código 2FA do Cliente**: Gerado dinamicamente para autorização sem restrições
 - ✅ **Código com expiração**: Timer visual e automático
 - ✅ **Múltiplas camadas** de validação
 
 ### 📍 Geolocalização
 - ✅ Captura de localização GPS em tempo real
 - ✅ Cálculo preciso de distância (Haversine)
-- ✅ Validação de raio (150 metros configurável)
+- ✅ Validação de raio (200 metros configurável)
 - ✅ Fallback se geolocalização for negada
 
 ### ⏰ Validação de Tempo
@@ -106,12 +106,13 @@ Parabéns! Você agora tem um **protótipo funcional completo** de um sistema de
 7. ✅ Validado automaticamente (sem restrições!)
 ```
 
-### Passo 4: Testar Senha Mestre (1 minuto)
+### Passo 4: Testar Código do Cliente sem QR (1 minuto)
 ```
-1. Na aba Checkin, clique em "Usar Token sem QR Code"
-2. Digite: mestre2024
-3. Clique em "Validar Token"
-4. ✅ Checkin/Checkout realizado sem restrições!
+1. Gere um código 2FA no Painel do Cliente
+2. Na aba Checkin, clique em "Usar Código 2FA do Cliente"
+3. Digite o código de 6 dígitos
+4. Clique em "Validar Código"
+5. ✅ Checkin/Checkout realizado sem restrições de distância/horário!
 ```
 
 ### Passo 5: Explorar (5-10 minutos)
@@ -144,13 +145,13 @@ Parabéns! Você agora tem um **protótipo funcional completo** de um sistema de
 
 ### 🔐 Credenciais de Acesso
 
-**Senha Mestre do Cliente**: `mestre2024`  
-**Códigos 2FA**: Gerados automaticamente (6 dígitos)
+**Códigos 2FA**: Gerados dinamicamente (6 dígitos, válidos por 15 minutos)
+**Geração**: Via "Painel do Cliente" → "✨ Gerar Código 2FA"
 
 ### 🎯 Exemplo: Bruno Reichembak (Padrão)
 - **Endereço**: Rua Itajubá, 768. Joinville/SC
 - **Coordenadas**: -26.253337, -48.841455
-- **Raio**: 150 metros
+- **Raio**: 200 metros
 - **Janela Entrada**: 06:00-10:00 (1h antes + 3h depois)
 - **Janela Saída**: 15:00-19:00 (2h antes + 2h depois)
 
@@ -164,8 +165,7 @@ Parabéns! Você agora tem um **protótipo funcional completo** de um sistema de
 | Fora do Horário | 12:00 + dentro do raio | ❌ INVÁLIDO |
 | Fora do Raio | Horário correto + longe (>150m) | ❌ INVÁLIDO |
 | Código Errado | Digite 000000 | Alerta de erro |
-| Código Cliente | Use código do painel | ✅ VALIDADO (sem restrições) |
-| Senha Mestre | Digite mestre2024 | ✅ VALIDADO (sem restrições) |
+| Código Cliente | Use código do painel do cliente | ✅ VALIDADO (sem restrições) |
 | Persistência | Recarregue página (F5) | Dados persistem |
 | Multi-usuário | Troque prestador | Novos horários/local |
 

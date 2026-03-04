@@ -256,36 +256,92 @@ html, body {
 .qr-simulation {
     display: flex;
     justify-content: center;
-    margin: 1.5rem 0;
+    margin: 2rem 0;
 }
 
 .qr-code-placeholder {
-    width: 200px;
-    height: 200px;
-    border: 3px dashed var(--primary-color);
-    border-radius: 12px;
+    width: 220px;
+    height: 220px;
+    border: 4px dashed transparent;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--gray-100);
-    font-size: 3rem;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2),
+                0 6px 12px rgba(118, 75, 162, 0.15);
+    font-size: 4rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.qr-code-placeholder::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.qr-code-placeholder:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3),
+                0 8px 15px rgba(118, 75, 162, 0.2);
+}
+
+.qr-code-placeholder p {
+    position: relative;
+    z-index: 1;
+}
+
+.qr-code-placeholder p:first-child {
+    filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
 }
 
 .qr-code-placeholder p:last-child {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--gray-600);
+    font-weight: 600;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Responsividade do QR Code */
+@media (max-width: 768px) {
+    .qr-code-placeholder {
+        width: 180px;
+        height: 180px;
+        font-size: 3rem;
+    }
+    
+    .qr-code-placeholder p:last-child {
+        font-size: 0.85rem;
+    }
 }
 
 /* QR Result */
 .qr-result {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: var(--gray-100);
-    border-radius: 8px;
-    border-left: 4px solid var(--success-color);
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    border-radius: 12px;
+    border-left: 5px solid var(--success-color);
     color: var(--gray-800);
     display: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
 }
 
 .qr-result.show {
@@ -388,6 +444,26 @@ html, body {
 
 .btn-primary:hover {
     background-color: var(--primary-dark);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+#scanQRBtn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+#scanQRBtn:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #65408a 100%);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+    transform: translateY(-2px);
+}
+
+#scanQRBtn:active {
+    transform: translateY(0);
 }
 
 .btn-success {
@@ -765,8 +841,43 @@ html, body {
 .btn-warning {
     background-color: var(--warning-color);
     color: white;
+    transition: all 0.3s ease;
 }
 
 .btn-warning:hover {
     background-color: #d97706;
+    box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
+}
+
+#masterPasswordBtn {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Grid de 2 Colunas - Responsivo */
+.qr-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.qr-grid-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (max-width: 968px) {
+    .qr-grid-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+/* Melhorias visuais do card de QR */
+.card .description {
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
 }

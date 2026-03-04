@@ -24,7 +24,7 @@
 
 ### Cenário
 - Horário: Entre 07:00 e 11:00 (janela de entrada)
-- Localização: Dentro de 150 metros do ponto base
+- Localização: Dentro de 200 metros do ponto base
 
 ### Passos
 1. Abra o sistema
@@ -47,7 +47,7 @@
 ✓ ENTRADA VALIDADO COM SUCESSO!
 
 Validações:
-- Distância: ~50.45 m ✓ (dentro de 150m)
+- Distância: ~50.45 m ✓ (dentro de 200m)
 - Horário: 08:30 ✓ (dentro de 07:00-11:00)
 - Status: OK
 ```
@@ -58,7 +58,7 @@ Validações:
 
 ### Cenário
 - Horário: 12:30 (fora da janela de entrada 07:00-11:00)
-- Localização: Dentro de 150 metros
+- Localização: Dentro de 200 metros
 
 ### Passos
 1. Abra o sistema
@@ -72,7 +72,7 @@ Validações:
 ✗ ENTRADA INVÁLIDO - Verifique distância e horário
 
 Validações:
-- Distância: ~50.45 m ✓ (dentro de 150m)
+- Distância: ~50.45 m ✓ (dentro de 200m)
 - Horário: 12:30 ✗ (fora de 07:00-11:00)
 - Status: NOK
 ```
@@ -83,7 +83,7 @@ Validações:
 
 ### Cenário
 - Horário: Entre 15:00 e 19:00 (janela de saída)
-- Localização: Dentro de 150 metros
+- Localização: Dentro de 200 metros
 
 ### Passos
 1. Ajuste a hora do seu computador para 17:30
@@ -97,7 +97,7 @@ Validações:
 ✓ SAÍDA VALIDADO COM SUCESSO!
 
 Validações:
-- Distância: ~50.45 m ✓ (dentro de 150m)
+- Distância: ~50.45 m ✓ (dentro de 200m)
 - Horário: 17:30 ✓ (dentro de 15:00-19:00)
 - Status: OK
 ```
@@ -107,7 +107,7 @@ Validações:
 ## 🧭 Teste 4: Localização Fora do Raio
 
 ### Cenário
-- Localização: Mais de 150 metros do ponto base
+- Localização: Mais de 200 metros do ponto base
 - Horário: Dentro da janela válida
 
 ### Como Simular
@@ -201,48 +201,49 @@ Validações:
 
 ---
 
-## 🔐 Teste 8: Senha Mestre - Override Total
+## 🔐 Teste 8: Código 2FA do Cliente - Bypass
 
 ### Cenário
-- Supervisor usa senha mestre para acesso total sem restrições
+- Prestador usa código 2FA do cliente para acesso sem restrições de localização/horário
 
 ### Passos
-1. Na aba **"📱 Checkin/QRCode"**
-2. Clique em **"Usar Token sem QR Code"**
-3. Um modal Bootstrap solicitará a senha mestre
-4. Digite: `mestre2024`
-5. Clique em **"Validar Token"**
+1. Vá até o **Painel do Cliente** e clique em "✨ Gerar Código 2FA"
+2. Copie o código gerado
+3. Na aba **"📱 Checkin/QRCode"** clique em **"🔍 Usar Código 2FA do Cliente"**
+4. Um modal solicitará o código 2FA
+5. Digite o código copiado
+6. Clique em **"Validar Código"**
 
 ### Resultado Esperado
 ```
 ✓ ENTRADA VALIDADO COM SUCESSO!
-[TOKEN MESTRE]
+[CÓDIGO CLIENTE]
 
 Validações:
-- Token Mestre: ✓ VÁLIDO
+- Código Cliente: ✓ VÁLIDO
 - Status: OK
-- Todas as restrições: IGNORADAS
+- Restrições de distância/horário: IGNORADAS
 ```
 
-**Observação**: O histórico mostrará `Master Override` nas observações.
+**Observação**: O histórico mostrará `usedClientCode: true` nos dados.
 
 ---
 
-## 🚫 Teste 9: Senha Mestre Incorreta
+## 🚫 Teste 9: Código Cliente Inválido
 
 ### Cenário
-- Tentativa com senha mestre errada
+- Tentativa com código 2FA errado ou expirado
 
 ### Passos
-1. Clique em **"Usar Token sem QR Code"**
-2. Digite uma senha incorreta (ex: `senha123`)
-3. Clique em **"Validar Token"**
+1. Clique em **"🔍 Usar Código 2FA do Cliente"**
+2. Digite um código incorreto (ex: `123456`)
+3. Clique em **"Validar Código"**
 
 ### Resultado Esperado
 ```
-Alerta: "Token inválido!"
-Modal fecha automaticamente
-Nenhum checkin realizado
+Alerta: "Código 2FA inválido ou expirado!"
+Modal não se fecha
+Campo é limpo para nova tentativa
 ```
 
 ---
@@ -369,10 +370,10 @@ Necessário gerar novo código
 | | Use `localStorage.getItem('presenceHistory')` no console |
 | Distância sempre 0 | Isso é normal se usar a mesma localização |
 | | Mude sua localização ou altere coordenadas no código |
-| Senha mestre não funciona | Verifique se digitou `mestre2024` exatamente |
-| | Senha é case-sensitive |
 | Código cliente não funciona | Verifique se não expirou (15 minutos) |
 | | Gere um novo código se necessário |
+| Código cliente recusado | Verifique se o código está ativo |
+| | Use o botão "Copiar" para garantir código correto |
 
 ---
 
@@ -419,7 +420,7 @@ const USERS = [
             address: 'Seu endereço',
             lat: -26.253337,  // Sua latitude
             lon: -48.841455,  // Sua longitude
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '09:00',  // Novo horário de entrada
@@ -487,8 +488,8 @@ const expiresAt = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutos
 - [ ] Botão copiar funciona
 - [ ] Código cliente bypassa restrições
 - [ ] Histórico de códigos é exibido
-- [ ] Senha mestre funciona (mestre2024)
-- [ ] Senha mestre incorreta é rejeitada
+- [ ] Código cliente expira após 15 minutos
+- [ ] Código cliente inválido é rejeitado
 
 ### Multiu suário
 - [ ] Troca de usuário funciona

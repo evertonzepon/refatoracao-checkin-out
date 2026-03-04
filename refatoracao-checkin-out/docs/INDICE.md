@@ -66,13 +66,7 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 5. Use o código do cliente no fluxo de validação
 6. ✅ Aprovação automática sem restrições!
 
-### 4️⃣ Terceiro Teste - Senha Mestre (1 minuto)
-1. Clique em **"Usar Token sem QR Code"**
-2. Digite: **mestre2024**
-3. Clique em **"Validar Token"**
-4. ✅ Checkin/Checkout imediato sem restrições!
-
-### 5️⃣ Explorar Funcionalidades (5-10 minutos)
+### 4️⃣ Explorar Funcionalidades (5-10 minutos)
 - Navegue pelas 4 abas (Checkin, Cliente, Contrato, Histórico)
 - Teste diferentes usuários/prestadores (8 disponíveis)
 - Teste diferentes horários e cenários
@@ -127,13 +121,6 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 - [x] Histórico de códigos gerados
 - [x] Marcação no registro de presença
 
-### ✅ Senha Mestre (NOVO v2.0)
-- [x] Token "mestre2024" para override completo
-- [x] Modal dedicado para senha
-- [x] Bypass de todas as validações
-- [x] Checkin/Checkout direto
-- [x] Rastreabilidade no histórico
-
 ### ✅ Múltiplos Usuários (NOVO v2.0)
 - [x] 8 prestadores pré-configurados
 - [x] Seletor de usuário (dropdown)
@@ -146,7 +133,7 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 - [x] Interface responsiva (desktop, tablet, mobile)
 - [x] Animações suaves
 - [x] Feedback visual claro
-- [x] **Modais Bootstrap 5.3** (2FA, Resultado, Senha Mestre)
+- [x] **Modais Bootstrap 5.3** (2FA, Resultado, Código do Cliente)
 - [x] Status em tempo real e dinâmico
 - [x] **Timer countdown visual** (QR: 45s, Cliente: 15min)
 - [x] Tabela de histórico com 9 colunas
@@ -385,7 +372,7 @@ const USERS = [
             address: 'Seu endereço',
             lat: -26.253337,
             lon: -48.841455,
-            radiusInMeters: 150
+            radiusInMeters: 200
         },
         contract: {
             entryTime: '09:00',

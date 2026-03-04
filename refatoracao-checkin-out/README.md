@@ -6,8 +6,7 @@ Protótipo web funcional de um sistema de validação de presença com QR Code, 
 
 ✅ **Validação por QR Code** - Simulação de leitura de QR code  
 ✅ **Autenticação 2FA** - Código aleatório de 6 dígitos para validar presença  
-✅ **Painel do Cliente** - Geração de código 2FA para autorização sem restrições  
-✅ **Senha Mestre** - Token do cliente para checkin/checkout sem validações  
+✅ **Painel do Cliente** - Geração de código 2FA para autorização sem restrições de localização/horário  
 ✅ **Múltiplos Usuários** - Sistema com 8 prestadores pré-configurados  
 ✅ **Validação de Localização** - Cálculo de distância usando algoritmo Haversine  
 ✅ **Validação Temporal** - Janelas de tempo configuráveis para entrada e saída  
@@ -33,7 +32,7 @@ Protótipo web funcional de um sistema de validação de presença com QR Code, 
 - **Endereço**: Motorista PX, Rua Itajubá, 768. Bom Retiro. Joinville/SC
 - **Latitude**: -26.253337
 - **Longitude**: -48.841455
-- **Raio de Validação**: 150 metros
+- **Raio de Validação**: 200 metros
 - **Entrada Prevista**: 07:00
 - **Saída Prevista**: 17:00
 
@@ -99,12 +98,14 @@ A aplicação possui 4 abas no topo:
 6. Digite o código do cliente (ao invés do código do QR)
 7. **✅ Validação aprovada automaticamente** - sem verificação de localização ou horário
 
-**Opção B: Usando Senha Mestre**
+**Opção B: Usando Código 2FA do Cliente (Alternativo)**
 
-1. Na aba **📱 Checkin/QRCode**, clique em "Usar Token sem QR Code"
-2. Digite a senha mestre: **mestre2024**
-3. Clique em "Validar Token"
-4. **✅ Checkin/Checkout realizado automaticamente** - sem restrições
+1. Na aba **🎯 Painel do Cliente**, gere um novo código 2FA se não houver um ativo
+2. Copie o código (botão "📋 Copiar")
+3. Volte à aba **📱 Checkin/QRCode** e clique em "🔍 Usar Código 2FA do Cliente"
+4. Digite o código 2FA de 6 dígitos
+5. Clique em "Validar Código"
+6. **✅ Checkin/Checkout realizado automaticamente** - sem validações de distância ou horário
 
 ### 5. Histórico
    - Todos os registros aparecem na aba **🕒 Histórico**
@@ -116,16 +117,16 @@ A aplicação possui 4 abas no topo:
 
 ### ✓ Validação de Distância
 - Calcula distância real usando fórmula Haversine (grande-círculo)
-- Compara com raio configurado (150m por padrão)
+- Compara com raio configurado (200m por padrão)
 - Retorna distância precisa em metros
-- **Pode ser ignorada** com código do cliente ou senha mestre
+- **Pode ser ignorada** com código 2FA válido do cliente
 
 ### ✓ Validação de Horário
 - Verifica se o checkin está dentro da janela permitida
 - Janelas configuráveis por prestador
 - Exemplo: Entrada: 06:00-10:00 | Saída: 15:00-19:00
 - Algoritmo identifica automaticamente entrada ou saída
-- **Pode ser ignorada** com código do cliente ou senha mestre
+- **Pode ser ignorada** com código 2FA válido do cliente
 
 ### ✓ Autenticação 2FA Dupla
 - **Modo Normal**: Código gerado no QR (expira em 45 segundos)
@@ -138,8 +139,6 @@ A aplicação possui 4 abas no topo:
 - Token: **mestre2024**
 - Permite checkin/checkout sem QR Code
 - Ignora todas as validações de localização e horário
-- Útil para situações excepcionais
-
 ### ✓ Geolocalização
 - Solicita permissão ao usuário
 - Se negada, simula localização próxima (~50m)

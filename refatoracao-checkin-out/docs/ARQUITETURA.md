@@ -132,27 +132,27 @@ validate2FACode()
                     (ignora validações de distância e horário)
 ```
 
-### 3️⃣ Fluxo de Senha Mestre
+### 3️⃣ Fluxo Alternativo com Código 2FA do Cliente
 
 ```
-Prestador Clica "Usar Token sem QR Code"
+Prestador Clica "Usar Código 2FA do Cliente"
             ↓
-Exibe Modal de Senha Mestre
+Exibe Modal para Entrada do Código 2FA
             ↓
 showMasterPasswordModal()
             ↓
-Prestador Digita "mestre2024"
+Prestador Digita Código do Cliente (6 dígitos)
             ↓
 validateMasterPassword()
      │
-     ├─ Senha Incorreta → Alerta
+     ├─ Código Inválido ou Expirado → Alerta
      │
-     └─ Senha Correta → appState.usedClientCode = true
+     └─ Código Válido → appState.usedClientCode = true
                           ↓
                     getUserLocation() (opcional)
                           ↓
                     performPresenceValidation()
-                    (ignora todas as validações)
+                    (ignora validações de distância e horário)
 ```
 
 ---
@@ -198,8 +198,7 @@ appState = {
   usedClientCode: boolean
 }
 
-// Senha mestre do cliente
-MASTER_PASSWORD = "mestre2024"
+// Códigos 2FA do cliente são gerados dinamicamente no painel
 ```
 
 ### 2. **BUSINESS LOGIC LAYER** (Validações)
@@ -257,8 +256,8 @@ Saída: void (atualiza UI)
 
 #### Função: validateMasterPassword()
 ```
-Entrada: password input
-Validação: input === "mestre2024"
+Entrada: código 2FA input
+Validação: input === appState.activeClientCode && !expirado
 Saída: Se válido, faz checkin direto com usedClientCode = true
 ```
 
@@ -370,12 +369,12 @@ localStorage.getItem('clientCodesHistory') → JSON.parse()
    ├─ copyCodeBtn.click() → Clipboard API
    └─ revokeCodeBtn.click() → revokeClientCode()
 
-5. INTERACTION - Senha Mestre
+5. INTERACTION - Código 2FA do Cliente
    ├─ masterPasswordBtn.click()
    ├─ showMasterPasswordModal()
    ├─ validateMasterPasswordBtn.click()
-   ├─ validateMasterPassword()
-   └─ performPresenceValidation() (bypass validations)
+   ├─ validateMasterPassword() [valida código 2FA ativo]
+   └─ performPresenceValidation() (bypass distance & time validations)
 
 6. INTERACTION - Trocar Usuário
    ├─ userSelect.change()
@@ -423,12 +422,8 @@ localStorage.getItem('clientCodesHistory') → JSON.parse()
 - Flexibilidade para o cliente autorizar
 - Rastreabilidade (registrado no histórico)
 - Mantém audit trail
-
-### Por que Senha Mestre?
-- Fallback quando QR Code não funciona
-- Override para situações críticas
-- Simplicidade de uso
-- Controle total do cliente
+- Válido por tempo limitado (15 minutos)
+- Mais seguro que senha fixa
 
 ---
 
@@ -437,8 +432,8 @@ localStorage.getItem('clientCodesHistory') → JSON.parse()
 - **Total de linhas**: ~1600 (HTML: 367, JS: 1010, CSS: ~220)
 - **Funções principais**: 30+
 - **Usuários cadastrados**: 8
-- **Tipos de validação**: 3 (normal, cliente, mestre)
-- **Modais**: 3 (2FA, Resultado, Senha Mestre)
+- **Tipos de validação**: 2 (normal com QR, alternativo com código 2FA)
+- **Modais**: 3 (2FA, Resultado, Código do Cliente)
 - **Telas**: 4 (Checkin, Cliente, Contrato, Histórico)
 - **localStorage keys**: 2 (presenceHistory, clientCodesHistory)
 - **Timers**: 3 (status, QR, cliente)
@@ -450,7 +445,7 @@ localStorage.getItem('clientCodesHistory') → JSON.parse()
 ### Níveis de Segurança
 
 **Nível 1: Máxima Segurança (QR Code Normal)**
-- ✅ Validação de geolocalização (raio 150m)
+- **Validação de geolocalização (raio 200m)
 - ✅ Validação de janela temporal
 - ✅ Código 2FA (45 segundos)
 - ✅ Registrado como validação normal
@@ -458,16 +453,9 @@ localStorage.getItem('clientCodesHistory') → JSON.parse()
 **Nível 2: Segurança Moderada (Código Cliente)**
 - ❌ Sem validação de geolocalização
 - ❌ Sem validação temporal
-- ✅ Código 2FA (15 minutos)
+- ✅ Código 2FA (15 minutos, tempo limitado)
 - ✅ Registrado como "usou código do cliente"
-- ⚠️ Rastreável no histórico
-
-**Nível 3: Override Completo (Senha Mestre)**
-- ❌ Sem validação de geolocalização
-- ❌ Sem validação temporal
-- ⚠️ Apenas senha simples
-- ✅ Registrado como "usou código do cliente"
-- ⚠️ Rastreável no histórico
+- ✅ Rastreável e auditável no histórico
 
 ---
 

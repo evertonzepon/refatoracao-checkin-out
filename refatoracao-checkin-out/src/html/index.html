@@ -27,46 +27,52 @@
         <div class="screens">
             <!-- Screen: QR code & checkin -->
             <section id="screenQR" class="screen active">
-                <!-- Status Current -->
-                <div class="card status-card">
-                    <h2>📊 Status Atual</h2>
-                    <div class="status-info">
-                        <p>Usuário: <strong id="statusUser"></strong></p>
-                        <p>Hora: <strong id="currentTime"></strong></p>
-                        <div style="margin: 1rem 0; padding: 1rem; background-color: rgba(255,255,255,0.1); border-radius: 8px;">
-                            <p style="margin-bottom: 0.5rem;">Status: <span id="statusBadge" class="badge badge-inactive">Carregando...</span></p>
+                <!-- Grid de 2 Colunas para Checkin/Checkout -->
+                <div class="qr-grid-container">
+                    <!-- QR Code Simulation -->
+                    <div class="card">
+                        <h2>📱 Scanear QR Code</h2>
+                        <p class="description">Clique no botão abaixo para simular a leitura do QR Code do local de trabalho</p>
+                        <div class="qr-simulation">
+                            <div class="qr-code-placeholder">
+                                <p>📲</p>
+                                <p>QR Code</p>
+                            </div>
                         </div>
-                        <p id="statusMessage" class="status-message"></p>
+                        <button id="scanQRBtn" class="btn btn-primary btn-large">🔍 Simular Leitura de QR Code</button>
+                        <div id="qrResult" class="qr-result"></div>
+                    </div>
+
+                    <!-- Coluna 2: Alternative Checkin + Status -->
+                    <div class="qr-grid-column">
+                        <!-- Alternative Checkin without QR Code -->
+                        <div class="card">
+                            <h2>Checkin/Checkout sem QR Code</h2>
+                            <p class="description">Use o código 2FA fornecido pelo cliente para fazer checkin/checkout sem restrições de localização ou horário</p>
+                            <button id="masterPasswordBtn" class="btn btn-warning btn-large">Usar Código 2FA do Cliente</button>
+                        </div>
+
+                        <!-- Status Current -->
+                        <div class="card status-card">
+                            <h2>📊 Status Atual</h2>
+                            <div class="status-info">
+                                <p>Usuário: <strong id="statusUser"></strong></p>
+                                <p>Hora: <strong id="currentTime"></strong></p>
+                                <div style="margin: 1rem 0; padding: 1rem; background-color: rgba(255,255,255,0.1); border-radius: 8px;">
+                                    <p style="margin-bottom: 0.5rem;">Status: <span id="statusBadge" class="badge badge-inactive">Carregando...</span></p>
+                                </div>
+                                <p id="statusMessage" class="status-message"></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- QR Code Simulation -->
-                <div class="card">
-                    <h2>📱 Scanear QR Code</h2>
-                    <p class="description">Clique no botão abaixo para simular a leitura do QR Code</p>
-                    <div class="qr-simulation">
-                        <div class="qr-code-placeholder">
-                            <p>📲</p>
-                            <p>QR Code</p>
-                        </div>
-                    </div>
-                    <button id="scanQRBtn" class="btn btn-primary btn-large">🔍 Simular Leitura de QR Code</button>
-                    <div id="qrResult" class="qr-result"></div>
-                </div>
-
-                <!-- Master Password Section -->
-                <div class="card">
-                    <h2>Checkin/Checkout sem QR Code</h2>
-                    <p class="description">Use o token fornecido pelo cliente para fazer checkin/checkout sem restrições de localização ou horário</p>
-                    <button id="masterPasswordBtn" class="btn btn-warning btn-large">Usar Token sem QR Code</button>
-                </div>
-
-                <!-- Master Password Modal -->
+                <!-- Client Code Modal -->
                 <div class="modal fade" id="modalMasterPassword" tabindex="-1" aria-labelledby="modalMasterPasswordLabel" aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="modalMasterPasswordLabel">Senha Mestre do Cliente</h5>
+                        <h5 class="modal-title" id="modalMasterPasswordLabel">Código 2FA do Cliente</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                       </div>
                       <div class="modal-body">
@@ -83,15 +89,23 @@
                             </div>
                           </div>
                         </div>
-                        <p class="description">Digite o token fornecido pelo cliente:</p>
+                        <p class="description">Digite o código 2FA fornecido pelo cliente:</p>
                         <div class="code-input" style="margin-bottom: 1rem;">
-                          <label for="masterPasswordInput">Token:</label>
-                          <input type="password" id="masterPasswordInput" class="form-control" placeholder="••••••">
-                          <small>Inserir o token fornecido pelo cliente</small>
+                          <label for="masterPasswordInput">Código 2FA:</label>
+                          <input type="text" id="masterPasswordInput" class="form-control" placeholder="000000" maxlength="6">
+                          <small>Digite os 6 dígitos do código 2FA do cliente</small>
+                        </div>
+                        <p class="description">Selecione o motivo:</p>
+                        <div class="code-input" style="margin-bottom: 1rem;">
+                          <label for="clientCodeReason">Motivo do Checkin/Checkout:</label>
+                          <select id="clientCodeReason" class="form-control">
+                            <option value="">-- Selecione uma opção --</option>
+                          </select>
+                          <small id="reasonHelpText" style="color: #6c757d;">Indique o motivo para este checkin/checkout</small>
                         </div>
                       </div>
                       <div class="modal-footer">
-                        <button id="validateMasterPasswordBtn" class="btn btn-success">Validar Token</button>
+                        <button id="validateMasterPasswordBtn" class="btn btn-success">Validar Código</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                       </div>
                     </div>
@@ -182,6 +196,10 @@
                             <label>Status Temporal:</label>
                             <p id="resultTimeStatus"></p>
                           </div>
+                          <div class="validation-item">
+                            <label>Motivo:</label>
+                            <p id="resultReason">-</p>
+                          </div>
                         </div>
                         <div id="finalResultMessage" class="result-message mt-3"></div>
                       </div>
@@ -245,11 +263,12 @@
                                         <th>Código</th>
                                         <th>Válido até</th>
                                         <th>Status</th>
+                                        <th>Utilizado em</th>
                                     </tr>
                                 </thead>
                                 <tbody id="clientCodesTableBody">
                                     <tr>
-                                        <td colspan="4" class="empty-message">Nenhum código gerado ainda</td>
+                                        <td colspan="5" class="empty-message">Nenhum código gerado ainda</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -340,12 +359,13 @@
                                     <th>Status Dist.</th>
                                     <th>Janela Temp.</th>
                                     <th>Status Temp.</th>
+                                    <th>Motivo</th>
                                     <th>Resultado</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTableBody">
                                 <tr>
-                                    <td colspan="9" class="empty-message">Nenhum registro de presença ainda</td>
+                                    <td colspan="10" class="empty-message">Nenhum registro de presença ainda</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -126,21 +126,29 @@ python -m http.server 8000
 
 ---
 
-## 🔑 Terceiro Teste - Senha Mestre (1 Minuto)
+## 🔐 Usar Código 2FA do Cliente (Alternativo)
 
-1. **Na aba "📱 Checkin/QRCode"** ↓
+1. **Vá até o "🎯 Painel do Cliente"** ↓
 
-2. **Clique no botão "Usar Token sem QR Code"** ↓
+2. **Clique em "✨ Gerar Código 2FA"** ↓
    
-   ![Modal de Senha Mestre abre]
+   Um código de 6 dígitos será gerado (válido por 15 minutos)
 
-3. **Digite a senha: mestre2024** ↓
+3. **Copie o código** usando o botão "📋 Copiar" ↓
 
-4. **Clique em "Validar Token"** ↓
+4. **Volte à aba "📱 Checkin/QRCode"** ↓
+
+5. **Clique em "🔍 Usar Código 2FA do Cliente"** ↓
    
-   ![Checkin/Checkout realizado automaticamente - sem restrições!]
+   Modal abrirá pedindo o código
 
-5. **Veja no histórico** o registro com todas as validações ignoradas ↓
+6. **Cole o código copiado** ou digite os 6 dígitos ↓
+
+7. **Clique em "Validar Código"** ↓
+   
+   ![Checkin/Checkout realizado automaticamente!]
+
+8. **Veja no histórico** o registro com código do cliente usado ↓
 
 ---
 
@@ -209,12 +217,7 @@ python -m http.server 8000
 - Use esse código ao invés do QR
 - **Resultado: ✅ VALIDADO - sem restrições**
 
-### Teste 7: Senha Mestre (Override Completo)
-- Use "Token sem QR Code"
-- Digite: mestre2024
-- **Resultado: ✅ VALIDADO - sem restrições**
-
-### Teste 8: Múltiplos Usuários
+### Teste 7: Múltiplos Usuários
 - Na aba "Contrato", troque de prestador
 - Cada um tem horários e locais diferentes
 - Teste diferentes janelas de validação
@@ -255,7 +258,7 @@ Local:          Motorista PX, Rua Itajubá, 768
                 Bom Retiro, Joinville/SC
 Coordenadas:    Latitude: -26.253337
                 Longitude: -48.841455
-Raio:           150 metros
+Raio:           200 metros
 Entrada:        07:00 (janela: 06:00-10:00)
                 1h antes + 3h depois
 Saída:          17:00 (janela: 15:00-19:00)
@@ -265,10 +268,9 @@ Saída:          17:00 (janela: 15:00-19:00)
 ### Credenciais de Acesso
 
 ```
-Senha Mestre:   mestre2024
 Códigos 2FA:    Gerados automaticamente (6 dígitos)
                 - QR Code: 45 segundos
-                - Cliente: 15 minutos
+                - Cliente: 15 minutos (via Painel do Cliente)
 ```
 
 ---
@@ -290,14 +292,6 @@ Códigos 2FA:    Gerados automaticamente (6 dígitos)
 - **Timer**: Countdown visual no painel
 - **Validações**: IGNORADAS (❌ distância, ❌ horário)
 - **Uso**: Situações excepcionais
-- **Rastreabilidade**: Marcado no histórico
-
-#### 3️⃣ Senha Mestre (Override Completo)
-- **Token**: mestre2024
-- **Validade**: Sempre válida
-- **Acesso**: Botão "Usar Token sem QR Code"
-- **Validações**: TODAS IGNORADAS
-- **Uso**: Emergências, problemas técnicos
 - **Rastreabilidade**: Marcado no histórico
 
 ### Fluxo de Validação:
