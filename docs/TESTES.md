@@ -7,6 +7,7 @@
 1. **Abra o arquivo `src/html/index.html` no navegador**
    - Clique duplo no arquivo ou arraste para o navegador
    - A página deve carregar com o layout completo e 4 abas
+   - Observe o layout em 2 colunas na tela de Checkin/QRCode
 
 2. **Permita acesso à localização**
    - Quando clicar no botão de scan, o navegador solicitará permissão
@@ -17,6 +18,11 @@
    - O sistema possui 8 prestadores pré-cadastrados
    - Cada um com horários e locais diferentes
    - Use a aba "Contrato / Usuário" para trocar entre eles
+
+4. **Layout Visual Melhorado**
+   - Coluna esquerda: Card de Scanear QR Code com visual gradiente
+   - Coluna direita: Card de Código 2FA + Status Atual
+   - QR Code com animações shimmer e efeitos hover
 
 ---
 
@@ -124,7 +130,7 @@ Validações:
 ✗ ENTRADA INVÁLIDO - Verifique distância e horário
 
 Validações:
-- Distância: 2.945.820,50 m ✗ (fora de 150m)
+- Distância: 2.945.820,50 m ✗ (fora de 200m)
 - Horário: 08:15 ✓ (dentro de 07:00-11:00)
 - Status: NOK
 ```
@@ -180,11 +186,15 @@ Necessário novo scan
 1. Clique na aba **"🎯 Painel do Cliente"**
 2. Clique em **"✨ Gerar Código 2FA"**
 3. Observe o código gerado e a validade (15 minutos)
-4. Clique em **"📋 Copiar"** para copiar o código
-5. Volte à aba **"📱 Checkin/QRCode"**
-6. Clique em **"🔍 Simular Leitura de QR Code"**
-7. Cole o código do cliente no campo
-8. Clique em **"✓ Validar Código"**
+4. Note que o código aparece na tabela de histórico com status "ATIVO"
+5. Clique em **"📋 Copiar"** para copiar o código
+6. Volte à aba **"📱 Checkin/QRCode"**
+7. Clique em **"Usar Código 2FA do Cliente"** (coluna direita)
+8. Cole o código e selecione um motivo (obrigatório)
+9. Clique em **"Validar Código"**
+10. Volte ao Painel do Cliente e observe:
+    - Status mudou para "USADO"
+    - Coluna "Utilizado em" mostra data/hora do uso
 
 ### Resultado Esperado
 ```
@@ -208,11 +218,16 @@ Validações:
 
 ### Passos
 1. Vá até o **Painel do Cliente** e clique em "✨ Gerar Código 2FA"
-2. Copie o código gerado
-3. Na aba **"📱 Checkin/QRCode"** clique em **"🔍 Usar Código 2FA do Cliente"**
-4. Um modal solicitará o código 2FA
-5. Digite o código copiado
-6. Clique em **"Validar Código"**
+2. Note que o código aparece na tabela de histórico com status "ATIVO"
+3. Copie o código gerado usando o botão "📋 Copiar"
+4. Na aba **"📱 Checkin/QRCode"** clique em **"Usar Código 2FA do Cliente"** (coluna direita)
+5. Um modal solicitará o código 2FA e o motivo
+6. Digite o código copiado
+7. Selecione um motivo adequado (obrigatório)
+8. Clique em **"Validar Código"**
+9. Volte ao Painel do Cliente e verifique a tabela de histórico:
+   - Status mudou de "ATIVO" para "✅ USADO"
+   - Coluna "Utilizado em" agora mostra a data/hora do uso
 
 ### Resultado Esperado
 ```
@@ -223,9 +238,13 @@ Validações:
 - Código Cliente: ✓ VÁLIDO
 - Status: OK
 - Restrições de distância/horário: IGNORADAS
+
+Histórico de Códigos:
+- Status atualizado para "USADO"
+- Data/hora de utilização registrada
 ```
 
-**Observação**: O histórico mostrará `usedClientCode: true` nos dados.
+**Observação**: O histórico de presença mostrará `usedClientCode: true` e o motivo selecionado.
 
 ---
 
@@ -348,7 +367,7 @@ Necessário gerar novo código
 | 50m | ✓ | Próximo |
 | 100m | ✓ | Perto |
 | 149m | ✓ | Limite |
-| 150m | ✓ | Limite exato |
+| 200m | ✓ | Limite exato |
 | 151m | ❌ | Fora |
 | 500m | ❌ | Muito longe |
 | 1000m+ | ❌ | Extremamente longe |
@@ -433,12 +452,6 @@ const USERS = [
 ];
 ```
 
-### Alterar Senha Mestre
-Edite `src/js/app.js` linha ~976:
-```javascript
-const MASTER_PASSWORD = 'novaSenha123';
-```
-
 ### Alterar Timer de Código QR
 Edite `src/js/app.js` linha ~309:
 ```javascript
@@ -504,7 +517,7 @@ const expiresAt = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutos
 
 ### Validações
 - [ ] Janelas de tempo são respeitadas
-- [ ] Validação de distância funciona (150m)
+- [ ] Validação de distância funciona (200m)
 - [ ] Status atualiza em tempo real
 - [ ] Códigos expirados são rejeitados
 
@@ -519,13 +532,13 @@ const expiresAt = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutos
 
 1. Comece com um teste bem-sucedido (QR Code) para mostrar o happy path
 2. Demonstre o Painel do Cliente e o bypass de restrições
-3. Mostre a senha mestre e o override total
+3. Mostre o código 2FA do cliente e o override total de validações
 4. Demonstre validação de 2FA com código incorreto
 5. Mostre o histórico crescendo com cada validação
 6. Mencione a persistência de dados recarregando a página
 7. Troque de usuário para mostrar os 8 prestadores
 8. Abra o console para mostrar a estrutura dos dados
-9. Explique as validações de distância (150m) e tempo
+9. Explique as validações de distância (200m) e tempo
 10. Mencione como dados podem ser sincronizados com backend
 
 ---

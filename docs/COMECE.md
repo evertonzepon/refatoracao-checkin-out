@@ -50,16 +50,24 @@ Parabéns! Você agora tem um **protótipo funcional completo** de um sistema de
 ### 📱 Interface & UX
 - ✅ **4 Telas com Abas**: Checkin, Cliente, Contrato, Histórico
 - ✅ Design responsivo (desktop/tablet/mobile)
+  - Layout 2 colunas na tela de Checkin (colapsa em mobile)
+  - QR Code visual com gradientes e animações
 - ✅ Modais Bootstrap 5.3 elegantes
 - ✅ Animações suaves e feedback visual
+  - Efeito shimmer no QR Code placeholder
+  - Hover effects com transformações
 - ✅ Timers com countdown visual
 
 ### 🎯 Painel do Cliente (NOVO!)
 - ✅ Geração de códigos 2FA de autorização
 - ✅ Códigos válidos por 15 minutos
 - ✅ Bypass de validações de localização e horário
-- ✅ Histórico de códigos gerados
+- ✅ Histórico completo de códigos gerados (5 colunas)
+  - Rastreamento de quando cada código foi utilizado
+  - Status: USADO/ATIVO/EXPIRADO
+  - Data/hora de geração, expiração e utilização
 - ✅ Botão copiar para clipboard
+- ✅ Seleção de motivo obrigatória para uso alternativo
 
 ### 💾 Persistência de Dados
 - ✅ Armazenamento em localStorage
@@ -163,7 +171,7 @@ Parabéns! Você agora tem um **protótipo funcional completo** de um sistema de
 |-------|---------|-------------------|
 | Checkin Normal | 07:15 + dentro do raio | ✅ VALIDADO |
 | Fora do Horário | 12:00 + dentro do raio | ❌ INVÁLIDO |
-| Fora do Raio | Horário correto + longe (>150m) | ❌ INVÁLIDO |
+| Fora do Raio | Horário correto + longe (>200m) | ❌ INVÁLIDO |
 | Código Errado | Digite 000000 | Alerta de erro |
 | Código Cliente | Use código do painel do cliente | ✅ VALIDADO (sem restrições) |
 | Persistência | Recarregue página (F5) | Dados persistem |

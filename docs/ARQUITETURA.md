@@ -275,15 +275,24 @@ nav.tabs
 **HTML Structure por Tela:**
 ```
 TELA 1: screenQR (Checkin/QRCode)
-├── Status Atual (badge + mensagem dinâmica)
-├── Simulação QR Code + botão Scan
-├── Seção Senha Mestre
+├── Layout Grid 2 Colunas (responsivo)
+│   ├── Coluna 1: Card Scanear QR Code
+│   │   ├── QR Code visual melhorado (gradientes e animações)
+│   │   ├── Botão Simular Leitura de QR Code
+│   │   └── Resultado do scan
+│   └── Coluna 2: Cards empilhados
+│       ├── Card Checkin/Checkout sem QR Code
+│       │   └── Botão Usar Código 2FA do Cliente
+│       └── Card Status Atual
+│           ├── Badge status dinâmico
+│           └── Mensagem de orientação
 ├── Modal 2FA (Bootstrap 5.3)
 │   ├── Timer countdown (45s)
 │   ├── Código gerado (display)
-│   └── Input para validação
+│   ├── Input para validação
+│   └── Select motivo (dinâmico: entrada/saída)
 └── Modal Resultado (Bootstrap 5.3)
-    └── Grid de validação
+    └── Grid de validação com motivo
 
 TELA 2: screenClient (Painel do Cliente)
 ├── Card Info do Cliente
@@ -293,7 +302,12 @@ TELA 2: screenClient (Painel do Cliente)
 │   ├── Timer de expiração (15 min)
 │   ├── Botão Copiar
 │   └── Botão Revogar
-└── Tabela Histórico de Códigos
+└── Tabela Histórico de Códigos (5 colunas)
+    ├── Data/Hora
+    ├── Código
+    ├── Válido até
+    ├── Status (USADO/ATIVO/EXPIRADO)
+    └── Utilizado em
 
 TELA 3: screenContract (Contrato)
 ├── Select de Prestador (8 opções)

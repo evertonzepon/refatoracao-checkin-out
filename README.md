@@ -4,9 +4,10 @@ Protótipo web funcional de um sistema de validação de presença com QR Code, 
 
 ## 🎯 Características Principais
 
-✅ **Validação por QR Code** - Simulação de leitura de QR code  
+✅ **Validação por QR Code** - Simulação de leitura de QR code com visual melhorado (gradientes e animações)  
 ✅ **Autenticação 2FA** - Código aleatório de 6 dígitos para validar presença  
 ✅ **Painel do Cliente** - Geração de código 2FA para autorização sem restrições de localização/horário  
+✅ **Rastreamento de Uso** - Histórico completo de códigos mostra quando foram utilizados  
 ✅ **Múltiplos Usuários** - Sistema com 8 prestadores pré-configurados  
 ✅ **Validação de Localização** - Cálculo de distância usando algoritmo Haversine  
 ✅ **Validação Temporal** - Janelas de tempo configuráveis para entrada e saída  
@@ -14,6 +15,7 @@ Protótipo web funcional de um sistema de validação de presença com QR Code, 
 ✅ **Geolocalização** - Captura localização real do dispositivo  
 ✅ **Armazenamento Local** - Dados persistem entre sessões (localStorage)  
 ✅ **Interface com Abas** - Navegação entre Checkin, Cliente, Contrato e Histórico  
+✅ **Layout Responsivo** - Design de 2 colunas que se adapta a mobile  
 
 ## 📋 Dados do Sistema
 
@@ -56,8 +58,12 @@ Protótipo web funcional de um sistema de validação de presença com QR Code, 
 
 ### 2. Navegação entre Telas
 A aplicação possui 4 abas no topo:
-- **📱 Checkin/QRCode**: Validações de presença, scan de QR code e uso de token
+- **📱 Checkin/QRCode**: Validações de presença com layout em 2 colunas
+  - Coluna esquerda: Card de QR Code com visual melhorado (gradientes, animações)
+  - Coluna direita: Card de Código 2FA do Cliente + Status Atual
 - **🎯 Painel do Cliente**: Geração de códigos 2FA de autorização (sem restrições)
+  - Histórico com 5 colunas incluindo "Utilizado em"
+  - Status: USADO/ATIVO/EXPIRADO
 - **📋 Contrato / Usuário**: Informações do contrato, seleção de prestador
 - **🕒 Histórico**: Todos os logs de presença
 
@@ -73,7 +79,7 @@ A aplicação possui 4 abas no topo:
 2. **Validar 2FA**
    - Digite o código de 6 dígitos exibido
    - Clique em "Validar Código"
-   - O sistema valida localização (raio de 150m) e horário
+   - O sistema valida localização (raio de 200m) e horário
 
 3. **Resultados da Validação**
    - O sistema exibe em modal:
@@ -102,10 +108,14 @@ A aplicação possui 4 abas no topo:
 
 1. Na aba **🎯 Painel do Cliente**, gere um novo código 2FA se não houver um ativo
 2. Copie o código (botão "📋 Copiar")
-3. Volte à aba **📱 Checkin/QRCode** e clique em "🔍 Usar Código 2FA do Cliente"
+3. Volte à aba **📱 Checkin/QRCode** e clique em "Usar Código 2FA do Cliente" (coluna direita)
 4. Digite o código 2FA de 6 dígitos
-5. Clique em "Validar Código"
-6. **✅ Checkin/Checkout realizado automaticamente** - sem validações de distância ou horário
+5. Selecione um motivo obrigatório (ex: "Checkin antecipado")
+6. Clique em "Validar Código"
+7. **✅ Checkin/Checkout realizado automaticamente** - sem validações de distância ou horário
+8. Volte ao Painel do Cliente para ver o status atualizado:
+   - Status mudou para "USADO"
+   - Coluna "Utilizado em" mostra data/hora do uso
 
 ### 5. Histórico
    - Todos os registros aparecem na aba **🕒 Histórico**
@@ -134,11 +144,9 @@ A aplicação possui 4 abas no topo:
 - Código de 6 dígitos aleatórios
 - Timer visual com countdown
 - Impede acesso sem validação correta
+- Rastreamento completo: quando códigos foram gerados, expirados ou utilizados
+- Seleção de motivo obrigatória ao usar código do cliente
 
-### ✓ Senha Mestre
-- Token: **mestre2024**
-- Permite checkin/checkout sem QR Code
-- Ignora todas as validações de localização e horário
 ### ✓ Geolocalização
 - Solicita permissão ao usuário
 - Se negada, simula localização próxima (~50m)

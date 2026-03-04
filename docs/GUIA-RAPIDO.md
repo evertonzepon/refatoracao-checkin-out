@@ -157,18 +157,24 @@ python -m http.server 8000
 ### 4 Telas Principais (Navegação por Abas)
 
 **📱 Checkin/QRCode**
-- 📊 Status em tempo real e dinâmico
-- 📱 Simulação de QR Code
+- 📊 Layout em 2 colunas (responsivo)
+- 📱 Simulação de QR Code com design melhorado
+  - Visual com gradientes e animações shimmer
+  - Efeito hover interativo
 - 🔐 Autenticação 2FA (45 segundos)
-- 🔑 Opção de Senha Mestre
+- 🔑 Código 2FA do Cliente (com seleção de motivo)
 - ✅ Validação multi-camadas
+- 📊 Status em tempo real posicionado abaixo
 
 **🎯 Painel do Cliente**
 - ✨ Geração de Código 2FA (15 minutos)
 - 📋 Copiar código para clipboard
 - ⏱️ Timer de expiração visual
 - 🚫 Botão revogar código
-- 📜 Histórico de códigos gerados
+- 📜 Histórico de códigos gerados (5 colunas)
+  - Rastreamento completo: Data/Hora, Código, Validade
+  - Status: USADO/ATIVO/EXPIRADO
+  - Data/hora de utilização
 
 **📋 Contrato / Usuário**
 - 👥 Seletor de 8 prestadores
@@ -190,22 +196,22 @@ python -m http.server 8000
 ### Teste 1: Entrada Válida (QR Code Normal) ✓
 - Usuário: Bruno Reichembak
 - Horário: 07:15 (entre 06:00-10:00) ✓
-- Localização: Dentro de 150m ✓
+- Localização: Dentro de 200m ✓
 - **Resultado: ✅ VALIDADO**
 
 ### Teste 2: Entrada Inválida (Horário) ✗
 - Horário: 12:00 (fora de 06:00-10:00) ✗
-- Localização: Dentro de 150m ✓
+- Localização: Dentro de 200m ✓
 - **Resultado: ❌ INVÁLIDO - Fora da janela**
 
 ### Teste 3: Entrada Inválida (Distância) ✗
 - Horário: 07:15 (dentro) ✓
-- Localização: Longe, > 150m ✗
+- Localização: Longe, > 200m ✗
 - **Resultado: ❌ INVÁLIDO - Fora do raio**
 
 ### Teste 4: Saída Válida ✓
 - Horário: 17:00 - 18:00 (entre 15:00-19:00) ✓
-- Localização: Dentro de 150m ✓
+- Localização: Dentro de 200m ✓
 - **Resultado: ✅ VALIDADO**
 
 ### Teste 5: Código 2FA Errado ✗
@@ -297,7 +303,7 @@ Códigos 2FA:    Gerados automaticamente (6 dígitos)
 ### Fluxo de Validação:
 
 ```
-1. Scan QR Code / Gerar Código / Senha Mestre
+1. Scan QR Code / Gerar Código / Código 2FA Cliente
          ↓
 2. Sistema gera/solicita código 6 dígitos
          ↓
@@ -307,7 +313,7 @@ Códigos 2FA:    Gerados automaticamente (6 dígitos)
          ↓
 5a. Código QR    → Valida distância + horário
 5b. Código Cliente → Aprova automaticamente
-5c. Senha Mestre   → Aprova automaticamente
+5c. Código 2FA Cliente → Aprova automaticamente (selecionar motivo)
          ↓
 6. Registra no histórico
 ```

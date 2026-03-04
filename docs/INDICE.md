@@ -1,8 +1,8 @@
 # 📋 Índice do Projeto - Sistema de Checkin/Checkout
 
 **Data de Criação**: 26 de fevereiro de 2026  
-**Última Atualização**: 03 de março de 2026  
-**Versão**: 2.0  
+**Última Atualização**: 04 de março de 2026  
+**Versão**: 2.1  
 **Status**: ✅ Protótipo Funcional Completo  
 **Tecnologias**: HTML5 + CSS3 + JavaScript ES6+ + Bootstrap 5.3  
 
@@ -16,11 +16,11 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 ├─ 📱 APLICAÇÃO
 │   ├─ src/
 │   │   ├─ html/
-│   │   │   └─ index.html          ← ABRA ESTE ARQUIVO NO NAVEGADOR (367 linhas)
+│   │   │   └─ index.html          ← ABRA ESTE ARQUIVO NO NAVEGADOR (386 linhas)
 │   │   ├─ css/
-│   │   │   └─ style.css           ← Estilos (carregado automaticamente)
+│   │   │   └─ style.css           ← Estilos com CSS Grid e animações (883 linhas)
 │   │   └─ js/
-│   │       └─ app.js               ← Lógica completa (1010 linhas)
+│   │       └─ app.js               ← Lógica completa (1101 linhas)
 │
 ├─📚 DOCUMENTAÇÃO
 │   ├─ docs/
@@ -62,9 +62,11 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 1. Clique na aba **"🎯 Painel do Cliente"**
 2. Clique em **"✨ Gerar Código 2FA"**
 3. Copie o código gerado (válido 15 minutos)
-4. Volte à aba **"📱 Checkin/QRCode"**
-5. Use o código do cliente no fluxo de validação
-6. ✅ Aprovação automática sem restrições!
+4. Observe o histórico com 5 colunas (incluindo "Utilizado em")
+5. Volte à aba **"📱 Checkin/QRCode"**
+6. Use o código do cliente com seleção de motivo
+7. Volte ao Painel e veja status "USADO" e data de utilização
+8. ✅ Aprovação automática sem restrições!
 
 ### 4️⃣ Explorar Funcionalidades (5-10 minutos)
 - Navegue pelas 4 abas (Checkin, Cliente, Contrato, Histórico)
@@ -106,7 +108,7 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 - [x] Geração de código 2FA aleatório (dois tipos)
 - [x] Validação de código 2FA
 - [x] Cálculo de distância (Haversine)
-- [x] Validação de localização por raio (150m)
+- [x] Validação de localização por raio (200m)
 - [x] Validação de janela temporal
 - [x] Determinação automática de ENTRADA/SAÍDA
 - [x] Histórico de presença persistente
@@ -118,7 +120,10 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 - [x] Bypass de validações de localização e horário
 - [x] Botão copiar código (Clipboard API)
 - [x] Botão revogar código ativo
-- [x] Histórico de códigos gerados
+- [x] Histórico de códigos gerados (5 colunas)
+- [x] Rastreamento de uso: quando códigos foram utilizados
+- [x] Status: USADO/ATIVO/EXPIRADO
+- [x] Seleção de motivo obrigatória
 - [x] Marcação no registro de presença
 
 ### ✅ Múltiplos Usuários (NOVO v2.0)
@@ -130,20 +135,28 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 
 ### ✅ UI/UX
 - [x] **Interface com 4 abas** (Checkin, Cliente, Contrato, Histórico)
+- [x] **Layout 2 colunas responsivo** na tela Checkin/QRCode
+  - Coluna esquerda: QR Code com visual melhorado
+  - Coluna direita: Código 2FA + Status Atual
+- [x] **QR Code visual aprimorado**:
+  - Gradientes roxo-azul
+  - Animação shimmer
+  - Efeitos hover interativos
+  - Sombras coloridas
 - [x] Interface responsiva (desktop, tablet, mobile)
 - [x] Animações suaves
 - [x] Feedback visual claro
 - [x] **Modais Bootstrap 5.3** (2FA, Resultado, Código do Cliente)
 - [x] Status em tempo real e dinâmico
 - [x] **Timer countdown visual** (QR: 45s, Cliente: 15min)
-- [x] Tabela de histórico com 9 colunas
+- [x] Tabela de histórico com 10 colunas (inclui motivo)
 - [x] Design moderno com gradientes
 - [x] Coloração por status (verde/vermelho)
 
 ### ✅ Validações
 - [x] Geolocalização com fallback
 - [x] Expiração de código (5 min)
-- [x] Validação de distância (100m)
+- [x] Validação de distância (200m)
 - [x] Validação de horário (janelas)
 - [x] Relatório detalhado de validação
 - [x] Resultados OK/NOK claros
@@ -167,7 +180,7 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 - **Endereço**: Motorista PX, Rua Itajubá, 768. Bom Retiro. Joinville/SC
 - **Latitude**: -26.253337
 - **Longitude**: -48.841455
-- **Raio Permitido**: 100 metros
+- **Raio Permitido**: 200 metros
 
 ### Horários
 - **Entrada**: 08:00 (Janela: 07:00-11:00)
@@ -318,7 +331,7 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 ## 💡 Casos de Uso
 
 ### 1. Checkin Válido (QR Code Normal)
-**Pré-requisitos**: Dentro do raio (150m), dentro do horário  
+**Pré-requisitos**: Dentro do raio (200m), dentro do horário  
 **Ação**: Scan QR → 2FA (45s) → Validar  
 **Resultado**: ✅ VALIDADO → Registrado
 
@@ -327,8 +340,8 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 **Ação**: Gerar código cliente → Scan QR → Usar código cliente  
 **Resultado**: ✅ VALIDADO → Sem validações → Registrado com marcação
 
-### 3. Checkin com Senha Mestre (Override)
-**Pré-requisitos**: Conhecer senha "mestre2024"  
+### 3. Checkin com Código 2FA do Cliente (Override)
+**Pré-requisitos**: Código 2FA gerado no Painel do Cliente (válido 15 min)  
 **Ação**: "Usar Token sem QR" → Digite senha → Validar  
 **Resultado**: ✅ VALIDADO → Sem restrições → Registrado com marcação
 
@@ -338,7 +351,7 @@ C:\Users\EvertonZepon\Desktop\refatoracao-checkin-out\
 **Resultado**: ❌ INVÁLIDO → Registrado como falha
 
 ### 5. Checkin Fora do Raio
-**Pré-requisitos**: Fora do raio (>150m), dentro do horário  
+**Pré-requisitos**: Fora do raio (>200m), dentro do horário  
 **Ação**: Scan QR → 2FA → Validar  
 **Resultado**: ❌ INVÁLIDO → Registrado como falha
 
@@ -385,7 +398,7 @@ const USERS = [
 ];
 ```
 
-### Alterar Senha Mestre
+### Alterar Validade Código Cliente
 **Arquivo**: src/js/app.js, linha ~976
 ```javascript
 const MASTER_PASSWORD = 'novaSenha123';
@@ -488,7 +501,7 @@ Este protótipo demonstra:
 
 ## 🎆 Resumo
 
-✅ **Sistema Completo**: Checkin/Checkout com QR Code, autorização cliente e senha mestre  
+✅ **Sistema Completo**: Checkin/Checkout com QR Code e códigos 2FA de autorização do cliente  
 ✅ **8 Usuários**: Prestadores pré-configurados com horários e locais diferentes
 ✅ **3 Modos de Validação**: Normal (restrito), Cliente (bypass parcial), Mestre (override total)  
 ✅ **4 Telas**: Interface completa com navegação por abas  
