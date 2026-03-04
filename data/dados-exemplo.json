@@ -1,0 +1,35 @@
+{
+  "sistema": {
+    "versao": "1.0",
+    "data": "2026-02-26",
+    "descricao": "Exemplo de estrutura de dados para API de presença"
+  },
+  "usuario": {
+    "nome": "João Silva",
+    "matricula": "001"
+  },
+  "contrato": {
+    "endereco": "Motorista PX, Rua Itajubá, 768. Bom Retiro. Joinville/SC",
+    "latitude": -26.253337,
+    "longitude": -48.841455,
+    "raio_validacao_metros": 200,
+    "horarios": {
+      "entrada_prevista": "08:00",
+      "saida_prevista": "17:00"
+    }
+  },
+  "qr_code": {
+    "formato": "JSON (simulado)",
+    "conteudo": {
+      "endereco": "Motorista PX, Rua Itajubá, 768. Bom Retiro. Joinville/SC",
+      "latitude": -26.253337,
+      "longitude": -48.841455
+    }
+  },
+  "2fa": {
+    "tipo": "Código Aleatório",
+    "comprimento": 6
+  },
+  "registro_presenca": {},
+  "historico_presenca": []
+}
